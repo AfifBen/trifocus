@@ -15,11 +15,11 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.border),
+          borderRadius: BorderRadius.all(Radius.circular(24)),
+          side: BorderSide(color: AppColors.border),
         ),
       ),
       navigationBarTheme: const NavigationBarThemeData(
