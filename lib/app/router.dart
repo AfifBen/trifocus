@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/today/presentation/screens/today_screen.dart';
 import '../features/focus_session/presentation/screens/focus_screen.dart';
+import '../features/focus_session/presentation/screens/break_screen.dart';
+import '../features/focus_session/presentation/screens/session_complete_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/stats/presentation/screens/stats_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
@@ -49,6 +51,14 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/focus',
           builder: (context, state) => const FocusScreen(),
+        ),
+        GoRoute(
+          path: '/break',
+          builder: (context, state) => const BreakScreen(),
+        ),
+        GoRoute(
+          path: '/session-complete',
+          builder: (context, state) => const SessionCompleteScreen(),
         ),
         GoRoute(
           path: '/progress',
