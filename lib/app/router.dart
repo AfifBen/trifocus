@@ -7,6 +7,7 @@ import '../features/focus_session/presentation/screens/break_screen.dart';
 import '../features/focus_session/presentation/screens/session_complete_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/stats/presentation/screens/stats_screen.dart';
+import '../features/library/presentation/screens/library_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
@@ -22,7 +23,8 @@ final appRouter = GoRouter(
         final index = switch (location) {
           '/focus' => 1,
           '/progress' => 2,
-          '/stats' => 3,
+          '/library' => 3,
+          '/stats' => 4,
           _ => 0,
         };
         return Scaffold(
@@ -33,7 +35,8 @@ final appRouter = GoRouter(
               final route = switch (selected) {
                 1 => '/focus',
                 2 => '/progress',
-                3 => '/stats',
+                3 => '/library',
+                4 => '/stats',
                 _ => '/today',
               };
               if (route != location) {
@@ -63,6 +66,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/progress',
           builder: (context, state) => const ProgressScreen(),
+        ),
+        GoRoute(
+          path: '/library',
+          builder: (context, state) => const LibraryScreen(),
         ),
         GoRoute(
           path: '/stats',
