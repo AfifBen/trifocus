@@ -22,6 +22,7 @@ class AppBottomNav extends StatelessWidget {
         NavigationDestination(icon: Icon(Icons.today), label: 'Today'),
         NavigationDestination(icon: Icon(Icons.timer), label: 'Focus'),
         NavigationDestination(icon: Icon(Icons.auto_graph), label: 'Progress'),
+        NavigationDestination(icon: Icon(Icons.folder), label: 'Library'),
         NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
       ],
     );
