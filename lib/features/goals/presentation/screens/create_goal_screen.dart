@@ -58,6 +58,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: categories[index],
+                            isExpanded: true,
                             dropdownColor: AppColors.surface,
                             decoration: _inputDecoration('Category'),
                             items: const [
@@ -283,6 +284,7 @@ class _CategoryItemField extends StatelessWidget {
 
     return DropdownButtonFormField<String>(
       value: effectiveValue,
+      isExpanded: true,
       dropdownColor: AppColors.surface,
       decoration: decoration,
       items: items
