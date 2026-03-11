@@ -14,6 +14,7 @@ import '../features/library/presentation/screens/projects_screen.dart';
 import '../features/library/presentation/screens/habits_screen.dart';
 import '../features/library/presentation/screens/paths_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/history/presentation/screens/history_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
@@ -34,6 +35,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/history',
+      builder: (context, state) => const HistoryScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) {
