@@ -5,6 +5,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../stats/presentation/controllers/stats_controller.dart';
+import '../../../goals/presentation/controllers/today_goals_controller.dart';
+import '../controllers/active_goal_controller.dart';
 
 class SessionCompleteScreen extends ConsumerStatefulWidget {
   const SessionCompleteScreen({super.key});
@@ -15,6 +17,7 @@ class SessionCompleteScreen extends ConsumerStatefulWidget {
 
 class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
   bool _counted = false;
+  bool _goalUpdated = false;
 
   @override
   void didChangeDependencies() {
@@ -23,6 +26,25 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
       _counted = true;
       ref.read(statsProvider.notifier).completeSession();
     }
+    if (!_goalUpdated) {
+      _goalUpdated = true;
+      _incrementActiveGoal();
+    }
+  }
+
+  Future<void> _incrementActiveGoal() async {
+    final goalId = ref.read(activeGoalProvider);
+    if (goalId == null) return;
+
+    final goals = ref.read(todayGoalsProvider);
+    final idx = goals.indexWhere((g) => g.id == goalId);
+    if (idx == -1) return;
+
+    final goal = goals[idx];
+    final updated = goal.copyWith(
+      sessionsDone: (goal.sessionsDone + 1).clamp(0, goal.sessionsTotal),
+    );
+    await ref.read(todayGoalsProvider.notifier).updateGoal(updated);
   }
 
   @override
