@@ -73,7 +73,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Text(subtitle, style: AppTextStyles.body),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                const Icon(Icons.chevron_right, color: AppColors.textMuted),
               ],
             ),
           ],
