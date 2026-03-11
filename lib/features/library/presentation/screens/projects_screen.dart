@@ -32,7 +32,8 @@ class ProjectsScreen extends ConsumerWidget {
                         .removeProject(item.id),
                     child: ListTile(
                       title: Text(item.title),
-                      trailing: const Icon(Icons.chevron_right),
+                      trailing: const Icon(Icons.edit),
+                      onTap: () => _rename(context, ref, item.id, item.title),
                     ),
                   );
                 },
@@ -50,6 +51,39 @@ class ProjectsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _rename(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+    String current,
+  ) async {
+    final controller = TextEditingController(text: current);
+    final title = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename Project'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'Project name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (title == null || title.isEmpty) return;
+    await ref.read(libraryProvider.notifier).renameProject(id, title);
   }
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
