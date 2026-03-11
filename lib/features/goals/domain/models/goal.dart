@@ -35,4 +35,24 @@ class Goal {
       sessionsTotal: sessionsTotal ?? this.sessionsTotal,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'categoryType': categoryType,
+        'categoryItem': categoryItem,
+        'description': description,
+        'sessionsDone': sessionsDone,
+        'sessionsTotal': sessionsTotal,
+      };
+
+  factory Goal.fromJson(Map<String, dynamic> json) => Goal(
+        id: json['id'] as String,
+        title: json['title'] as String,
+        categoryType: json['categoryType'] as String,
+        categoryItem: json['categoryItem'] as String,
+        description: json['description'] as String? ?? '',
+        sessionsDone: json['sessionsDone'] as int? ?? 0,
+        sessionsTotal: json['sessionsTotal'] as int? ?? 4,
+      );
 }

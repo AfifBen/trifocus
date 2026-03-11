@@ -130,7 +130,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     );
   }
 
-  void _save() {
+  Future<void> _save() async {
     final newTitle = titleController.text.trim();
     if (newTitle.isEmpty) return;
 
@@ -146,7 +146,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
       sessionsTotal: total,
     );
 
-    ref.read(todayGoalsProvider.notifier).updateGoal(updated);
+    await ref.read(todayGoalsProvider.notifier).updateGoal(updated);
     Navigator.of(context).pop();
   }
 
