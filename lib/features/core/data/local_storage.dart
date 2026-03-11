@@ -4,6 +4,7 @@ import '../../goals/domain/models/goal.dart';
 import '../../library/domain/models/project.dart';
 import '../../library/domain/models/habit.dart';
 import '../../library/domain/models/path.dart';
+import '../../history/domain/models/focus_log.dart';
 
 class LocalStorage {
   static const _goalsKey = 'trifocus_goals';
@@ -15,6 +16,7 @@ class LocalStorage {
   static const _focusDurationKey = 'trifocus_focus_duration';
   static const _breakDurationKey = 'trifocus_break_duration';
   static const _reminderEnabledKey = 'trifocus_reminder_enabled';
+  static const _logsKey = 'trifocus_focus_logs';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -151,6 +153,22 @@ class LocalStorage {
     );
   }
 
+  static Future<List<FocusLog>> loadFocusLogs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_logsKey);
+    if (raw == null) return [];
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((e) => FocusLog.fromJson(e)).toList();
+  }
+
+  static Future<void> saveFocusLogs(List<FocusLog> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _logsKey,
+      jsonEncode(items.map((e) => e.toJson()).toList()),
+    );
+  }
+
   static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_goalsKey);
@@ -164,6 +182,7 @@ class LocalStorage {
     await prefs.remove(_reminderEnabledKey);
     await prefs.remove(_reminderHourKey);
     await prefs.remove(_reminderMinuteKey);
+    await prefs.remove(_logsKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -183,6 +202,7 @@ class LocalStorage {
       'reminderEnabled': prefs.getBool(_reminderEnabledKey),
       'reminderHour': prefs.getInt(_reminderHourKey),
       'reminderMinute': prefs.getInt(_reminderMinuteKey),
+      'focusLogs': prefs.getString(_logsKey),
     };
   }
 
@@ -226,5 +246,7 @@ class LocalStorage {
     await setBool(_reminderEnabledKey, data['reminderEnabled']);
     await setInt(_reminderHourKey, data['reminderHour']);
     await setInt(_reminderMinuteKey, data['reminderMinute']);
+
+    await setString(_logsKey, data['focusLogs']);
   }
 }

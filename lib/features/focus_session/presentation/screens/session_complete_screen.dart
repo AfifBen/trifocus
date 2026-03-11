@@ -6,7 +6,10 @@ import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../stats/presentation/controllers/stats_controller.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
+import '../../../history/domain/models/focus_log.dart';
+import '../../../history/presentation/controllers/history_controller.dart';
 import '../controllers/active_goal_controller.dart';
+import '../controllers/focus_timer_controller.dart';
 
 class SessionCompleteScreen extends ConsumerStatefulWidget {
   const SessionCompleteScreen({super.key});
@@ -18,6 +21,7 @@ class SessionCompleteScreen extends ConsumerStatefulWidget {
 class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
   bool _counted = false;
   bool _goalUpdated = false;
+  bool _logged = false;
 
   @override
   void didChangeDependencies() {
@@ -30,6 +34,35 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
       _goalUpdated = true;
       _incrementActiveGoal();
     }
+    if (!_logged) {
+      _logged = true;
+      _logSession();
+    }
+  }
+
+  Future<void> _logSession() async {
+    final goalId = ref.read(activeGoalProvider);
+    final goals = ref.read(todayGoalsProvider);
+
+    String? title;
+    if (goals.isNotEmpty) {
+      final idx = goalId == null ? 0 : goals.indexWhere((g) => g.id == goalId);
+      final safeIdx = idx >= 0 ? idx : 0;
+      title = goals[safeIdx].title;
+    }
+
+    final focusTimer = ref.read(focusTimerProvider);
+    final duration = focusTimer.totalSeconds;
+
+    await ref.read(historyProvider.notifier).add(
+          FocusLog(
+            id: 'log_${DateTime.now().millisecondsSinceEpoch}',
+            goalId: goalId,
+            goalTitle: title,
+            durationSeconds: duration,
+            createdAt: DateTime.now(),
+          ),
+        );
   }
 
   Future<void> _incrementActiveGoal() async {

@@ -23,9 +23,19 @@ class StatsScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Stats', style: AppTextStyles.headline),
-                IconButton(
-                  onPressed: () => context.push('/settings'),
-                  icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => context.push('/history'),
+                      icon: const Icon(Icons.history,
+                          color: AppColors.textPrimary),
+                    ),
+                    IconButton(
+                      onPressed: () => context.push('/settings'),
+                      icon: const Icon(Icons.settings,
+                          color: AppColors.textPrimary),
+                    ),
+                  ],
                 ),
               ],
             ),
