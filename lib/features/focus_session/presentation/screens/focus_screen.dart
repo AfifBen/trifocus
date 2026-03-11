@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
@@ -17,7 +18,7 @@ class FocusScreen extends ConsumerWidget {
       Future.microtask(() {
         if (context.mounted) {
           notifier.pause();
-          Navigator.of(context).pushReplacementNamed('/break');
+          context.go('/break');
         }
       });
     }
@@ -98,7 +99,7 @@ class FocusScreen extends ConsumerWidget {
               child: TextButton(
                 onPressed: () {
                   notifier.reset();
-                  Navigator.of(context).pushReplacementNamed('/session-complete');
+                  context.go('/session-complete');
                 },
                 child: const Text('End Session'),
               ),
