@@ -12,6 +12,8 @@ class LocalStorage {
   static const _habitsKey = 'trifocus_habits';
   static const _pathsKey = 'trifocus_paths';
   static const _goalsDayKey = 'trifocus_goals_day';
+  static const _focusDurationKey = 'trifocus_focus_duration';
+  static const _breakDurationKey = 'trifocus_break_duration';
 
   static Future<List<Goal>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,6 +37,26 @@ class LocalStorage {
   static Future<void> saveGoalsDay(String day) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_goalsDayKey, day);
+  }
+
+  static Future<int?> loadFocusDurationSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_focusDurationKey);
+  }
+
+  static Future<void> saveFocusDurationSeconds(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_focusDurationKey, seconds);
+  }
+
+  static Future<int?> loadBreakDurationSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_breakDurationKey);
+  }
+
+  static Future<void> saveBreakDurationSeconds(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_breakDurationKey, seconds);
   }
 
   static Future<Map<String, dynamic>> loadStats() async {

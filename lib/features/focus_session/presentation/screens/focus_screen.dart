@@ -6,6 +6,7 @@ import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../controllers/active_goal_controller.dart';
+import '../controllers/focus_settings_controller.dart';
 import '../controllers/focus_timer_controller.dart';
 
 class FocusScreen extends ConsumerWidget {
@@ -17,6 +18,7 @@ class FocusScreen extends ConsumerWidget {
     final notifier = ref.read(focusTimerProvider.notifier);
     final goals = ref.watch(todayGoalsProvider);
     final activeGoalId = ref.watch(activeGoalProvider);
+    final settings = ref.watch(focusSettingsProvider);
 
     final effectiveActiveGoalId = activeGoalId ?? (goals.isNotEmpty ? goals.first.id : null);
     if (effectiveActiveGoalId != activeGoalId && goals.isNotEmpty) {
@@ -43,10 +45,12 @@ class FocusScreen extends ConsumerWidget {
             const Text('Focus', style: AppTextStyles.headline),
             const SizedBox(height: 12),
             if (goals.isEmpty)
-              const Text('No goals yet. Create your 3 objectives first.', style: AppTextStyles.body)
+              const Text('No goals yet. Create your 3 objectives first.',
+                  style: AppTextStyles.body)
             else
               DropdownButtonFormField<String>(
                 value: effectiveActiveGoalId,
+                isExpanded: true,
                 dropdownColor: AppColors.surface,
                 decoration: InputDecoration(
                   hintText: 'Active goal',
@@ -68,8 +72,74 @@ class FocusScreen extends ConsumerWidget {
                       ),
                     )
                     .toList(),
-                onChanged: (id) => ref.read(activeGoalProvider.notifier).select(id),
+                onChanged:
+                    (id) => ref.read(activeGoalProvider.notifier).select(id),
               ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: settings.focusSeconds,
+                    isExpanded: true,
+                    dropdownColor: AppColors.surface,
+                    decoration: InputDecoration(
+                      hintText: 'Focus',
+                      hintStyle: const TextStyle(color: AppColors.textMuted),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 1500, child: Text('25 min')),
+                      DropdownMenuItem(value: 2700, child: Text('45 min')),
+                      DropdownMenuItem(value: 3600, child: Text('60 min')),
+                    ],
+                    onChanged: (value) {
+                      final v = value ?? 1500;
+                      ref.read(focusSettingsProvider.notifier).setFocusSeconds(v);
+                      if (!timer.isRunning) {
+                        notifier.reset(v);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: settings.breakSeconds,
+                    isExpanded: true,
+                    dropdownColor: AppColors.surface,
+                    decoration: InputDecoration(
+                      hintText: 'Break',
+                      hintStyle: const TextStyle(color: AppColors.textMuted),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 300, child: Text('5 min')),
+                      DropdownMenuItem(value: 600, child: Text('10 min')),
+                      DropdownMenuItem(value: 900, child: Text('15 min')),
+                    ],
+                    onChanged: (value) {
+                      final v = value ?? 300;
+                      ref.read(focusSettingsProvider.notifier).setBreakSeconds(v);
+                    },
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
             Expanded(
               child: Center(
