@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -55,20 +56,35 @@ class BreakScreen extends ConsumerWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      CircularProgressIndicator(
-                        value: timer.progress,
-                        strokeWidth: 10,
-                        backgroundColor: AppColors.surfaceAlt,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: timer.progress),
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) {
+                          return CircularProgressIndicator(
+                            value: value,
+                            strokeWidth: 10,
+                            backgroundColor: AppColors.surfaceAlt,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          );
+                        },
                       ),
-                      Text(
-                        _format(timer.remainingSeconds),
-                        style: const TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        ),
+                        child: Text(
+                          _format(timer.remainingSeconds),
+                          key: ValueKey(timer.remainingSeconds),
+                          style: const TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -80,7 +96,10 @@ class BreakScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: notifier.pause,
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      notifier.pause();
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: const BorderSide(color: AppColors.border),
@@ -95,7 +114,10 @@ class BreakScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: notifier.start,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      notifier.start();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textPrimary,
@@ -113,7 +135,10 @@ class BreakScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: () => context.go('/session-complete'),
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  context.go('/session-complete');
+                },
                 child: const Text('Skip Break'),
               ),
             ),

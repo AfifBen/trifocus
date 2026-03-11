@@ -159,42 +159,55 @@ class _GoalCard extends StatelessWidget {
         ? 0.0
         : goal.sessionsDone / goal.sessionsTotal;
 
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(goal.title, style: AppTextStyles.title),
-            if (goal.description.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(goal.description, style: AppTextStyles.body),
-            ],
-            const SizedBox(height: 8),
-            _CategoryChip(label: _categoryLabel(goal)),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                minHeight: 8,
-                value: progress,
-                backgroundColor: AppColors.background,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(goal.title, style: AppTextStyles.title),
+              if (goal.description.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(goal.description, style: AppTextStyles.body),
+              ],
+              const SizedBox(height: 8),
+              _CategoryChip(label: _categoryLabel(goal)),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: progress),
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return LinearProgressIndicator(
+                      minHeight: 8,
+                      value: value,
+                      backgroundColor: AppColors.background,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
-              style: AppTextStyles.body,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
+                style: AppTextStyles.body,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -220,17 +233,20 @@ class _EmptyGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
             Container(
               height: 36,
               width: 36,
@@ -254,7 +270,8 @@ class _EmptyGoalCard extends StatelessWidget {
               child: Text('Tap to set objective', style: AppTextStyles.body),
             ),
             const Icon(Icons.add, color: AppColors.primary),
-          ],
+            ],
+          ),
         ),
       ),
     );

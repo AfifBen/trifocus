@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -72,8 +73,10 @@ class FocusScreen extends ConsumerWidget {
                       ),
                     )
                     .toList(),
-                onChanged:
-                    (id) => ref.read(activeGoalProvider.notifier).select(id),
+                onChanged: (id) {
+                  HapticFeedback.selectionClick();
+                  ref.read(activeGoalProvider.notifier).select(id);
+                },
               ),
             const SizedBox(height: 12),
             Row(
@@ -101,6 +104,7 @@ class FocusScreen extends ConsumerWidget {
                       DropdownMenuItem(value: 3600, child: Text('60 min')),
                     ],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       final v = value ?? 1500;
                       ref.read(focusSettingsProvider.notifier).setFocusSeconds(v);
                       if (!timer.isRunning) {
@@ -133,6 +137,7 @@ class FocusScreen extends ConsumerWidget {
                       DropdownMenuItem(value: 900, child: Text('15 min')),
                     ],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       final v = value ?? 300;
                       ref.read(focusSettingsProvider.notifier).setBreakSeconds(v);
                     },
@@ -149,20 +154,35 @@ class FocusScreen extends ConsumerWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      CircularProgressIndicator(
-                        value: timer.progress,
-                        strokeWidth: 10,
-                        backgroundColor: AppColors.surfaceAlt,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: timer.progress),
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) {
+                          return CircularProgressIndicator(
+                            value: value,
+                            strokeWidth: 10,
+                            backgroundColor: AppColors.surfaceAlt,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          );
+                        },
                       ),
-                      Text(
-                        _format(timer.remainingSeconds),
-                        style: const TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        ),
+                        child: Text(
+                          _format(timer.remainingSeconds),
+                          key: ValueKey(timer.remainingSeconds),
+                          style: const TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -174,7 +194,10 @@ class FocusScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: notifier.pause,
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      notifier.pause();
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: const BorderSide(color: AppColors.border),
@@ -189,7 +212,10 @@ class FocusScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: notifier.start,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      notifier.start();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textPrimary,
@@ -208,6 +234,7 @@ class FocusScreen extends ConsumerWidget {
               width: double.infinity,
               child: TextButton(
                 onPressed: () {
+                  HapticFeedback.mediumImpact();
                   notifier.reset();
                   context.go('/session-complete');
                 },
