@@ -42,6 +42,13 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
   }
 
+  Future<void> resetTodayProgress() async {
+    final reset = state.map((g) => g.copyWith(sessionsDone: 0)).toList();
+    state = reset;
+    await LocalStorage.saveGoals(reset);
+    await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
+  }
+
   String _dayKey(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
     final m = dt.month.toString().padLeft(2, '0');

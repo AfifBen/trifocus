@@ -118,4 +118,16 @@ class LocalStorage {
       jsonEncode(items.map((e) => e.toJson()).toList()),
     );
   }
+
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_goalsKey);
+    await prefs.remove(_statsKey);
+    await prefs.remove(_projectsKey);
+    await prefs.remove(_habitsKey);
+    await prefs.remove(_pathsKey);
+    await prefs.remove(_goalsDayKey);
+    await prefs.remove(_focusDurationKey);
+    await prefs.remove(_breakDurationKey);
+  }
 }
