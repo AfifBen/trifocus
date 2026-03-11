@@ -8,6 +8,7 @@ import '../../../core/data/local_storage.dart';
 import '../../../focus_session/presentation/controllers/focus_settings_controller.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../notifications/reminder_controller.dart';
+import '../controllers/backup_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -99,6 +100,90 @@ class SettingsScreen extends ConsumerWidget {
                             );
                       },
                 child: const Text('Change reminder time'),
+              ),
+            ),
+            const SizedBox(height: 28),
+            const Text('Backup', style: AppTextStyles.title),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final json = await ref.read(backupProvider).exportJson();
+                  if (!context.mounted) return;
+                  await showDialog<void>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Export JSON'),
+                      content: SizedBox(
+                        width: 500,
+                        child: SingleChildScrollView(
+                          child: SelectableText(json),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Text('Export data (JSON)'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final controller = TextEditingController();
+                  final json = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Import JSON'),
+                      content: SizedBox(
+                        width: 500,
+                        child: TextField(
+                          controller: controller,
+                          maxLines: 10,
+                          decoration: const InputDecoration(
+                            hintText: 'Paste JSON here',
+                          ),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context)
+                              .pop(controller.text.trim()),
+                          child: const Text('Import'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (json == null || json.isEmpty) return;
+
+                  try {
+                    await ref.read(backupProvider).importJson(json);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Import complete.')),
+                    );
+                    context.go('/');
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Import failed: $e')),
+                    );
+                  }
+                },
+                child: const Text('Import data (JSON)'),
               ),
             ),
             const SizedBox(height: 28),
