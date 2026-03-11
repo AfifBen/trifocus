@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
@@ -25,19 +26,19 @@ class LibraryScreen extends ConsumerWidget {
             _SectionCard(
               title: 'Projects',
               subtitle: '${state.projects.length} items',
-              onTap: () => Navigator.of(context).pushNamed('/library/projects'),
+              onTap: () => context.push('/library/projects'),
             ),
             const SizedBox(height: 12),
             _SectionCard(
               title: 'Habits',
               subtitle: '${state.habits.length} items',
-              onTap: () => Navigator.of(context).pushNamed('/library/habits'),
+              onTap: () => context.push('/library/habits'),
             ),
             const SizedBox(height: 12),
             _SectionCard(
               title: 'Paths',
               subtitle: '${state.paths.length} items',
-              onTap: () => Navigator.of(context).pushNamed('/library/paths'),
+              onTap: () => context.push('/library/paths'),
             ),
           ],
         ),
