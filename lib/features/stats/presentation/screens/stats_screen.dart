@@ -5,6 +5,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../controllers/stats_controller.dart';
+import '../controllers/stats_derived_controller.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -12,6 +13,7 @@ class StatsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(statsProvider);
+    final derived = ref.watch(derivedStatsProvider);
 
     return AppScaffold(
       child: Padding(
@@ -42,7 +44,14 @@ class StatsScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             const Text('Your focus performance', style: AppTextStyles.body),
             const SizedBox(height: 24),
-            _StatCard(title: 'Total sessions', value: '${stats.totalSessions}'),
+            _StatCard(
+                title: 'Total sessions', value: '${derived.totalSessions}'),
+            const SizedBox(height: 12),
+            _StatCard(title: 'Focus today', value: '${derived.minutesToday} min'),
+            const SizedBox(height: 12),
+            _StatCard(
+                title: 'Focus this week',
+                value: '${derived.minutesThisWeek} min'),
             const SizedBox(height: 12),
             _StatCard(title: 'Streak', value: '${stats.streakDays} days'),
           ],
