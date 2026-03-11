@@ -13,6 +13,7 @@ import '../features/library/presentation/screens/library_screen.dart';
 import '../features/library/presentation/screens/projects_screen.dart';
 import '../features/library/presentation/screens/habits_screen.dart';
 import '../features/library/presentation/screens/paths_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
@@ -29,6 +30,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/create-goals',
       builder: (context, state) => const CreateGoalScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) {
