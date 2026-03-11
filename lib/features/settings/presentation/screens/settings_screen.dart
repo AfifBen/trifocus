@@ -8,6 +8,7 @@ import '../../../core/data/local_storage.dart';
 import '../../../focus_session/presentation/controllers/focus_settings_controller.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../notifications/reminder_controller.dart';
+import '../../../history/presentation/controllers/history_controller.dart';
 import '../controllers/backup_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -207,6 +208,41 @@ class SettingsScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
+                onPressed: () async {
+                  final ok = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Clear history?'),
+                      content: const Text('This will remove all focus session logs.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Clear'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (ok != true) return;
+
+                  await ref.read(historyProvider.notifier).clear();
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('History cleared.')),
+                    );
+                  }
+                },
+                child: const Text('Clear history'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.warning,
                   side: const BorderSide(color: AppColors.warning),
@@ -217,7 +253,7 @@ class SettingsScreen extends ConsumerWidget {
                     builder: (context) => AlertDialog(
                       title: const Text('Clear all data?'),
                       content: const Text(
-                        'This will remove goals, stats, and library items. This cannot be undone.',
+                        'This will remove goals, stats, library items, and history. This cannot be undone.',
                       ),
                       actions: [
                         TextButton(
@@ -243,6 +279,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref.invalidate(todayGoalsProvider);
                   ref.invalidate(focusSettingsProvider);
                   ref.invalidate(reminderProvider);
+                  ref.invalidate(historyProvider);
 
                   if (context.mounted) context.go('/');
                 },
