@@ -11,6 +11,7 @@ class LocalStorage {
   static const _projectsKey = 'trifocus_projects';
   static const _habitsKey = 'trifocus_habits';
   static const _pathsKey = 'trifocus_paths';
+  static const _goalsDayKey = 'trifocus_goals_day';
 
   static Future<List<Goal>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
@@ -24,6 +25,16 @@ class LocalStorage {
     final prefs = await SharedPreferences.getInstance();
     final payload = jsonEncode(goals.map((g) => g.toJson()).toList());
     await prefs.setString(_goalsKey, payload);
+  }
+
+  static Future<String?> loadGoalsDay() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_goalsDayKey);
+  }
+
+  static Future<void> saveGoalsDay(String day) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_goalsDayKey, day);
   }
 
   static Future<Map<String, dynamic>> loadStats() async {
