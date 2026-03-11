@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../domain/models/goal.dart';
+import '../../../library/presentation/controllers/library_controller.dart';
 import '../controllers/today_goals_controller.dart';
 
 class CreateGoalScreen extends ConsumerStatefulWidget {
@@ -18,9 +19,12 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
   final categoryControllers = List.generate(3, (_) => TextEditingController());
   final descriptionControllers = List.generate(3, (_) => TextEditingController());
   final categories = List.generate(3, (_) => 'project');
+  final selectedItems = List<String?>.generate(3, (_) => null);
 
   @override
   Widget build(BuildContext context) {
+    final library = ref.watch(libraryProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Create Goals')),
@@ -61,14 +65,39 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
                               DropdownMenuItem(value: 'path', child: Text('Path')),
                               DropdownMenuItem(value: 'work', child: Text('Work')),
                             ],
-                            onChanged: (value) => categories[index] = value ?? 'project',
+                            onChanged: (value) {
+                              setState(() {
+                                categories[index] = value ?? 'project';
+                                selectedItems[index] = null;
+                                categoryControllers[index].text = '';
+                              });
+                            },
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextField(
+                          child: _CategoryItemField(
+                            type: categories[index],
+                            value: selectedItems[index],
+                            projects: library.projects.map((e) => e.title).toList(),
+                            habits: library.habits.map((e) => e.title).toList(),
+                            paths: library.paths.map((e) => e.title).toList(),
                             controller: categoryControllers[index],
-                            style: const TextStyle(color: AppColors.textPrimary),
+                            onChanged: (v) {
+                              setState(() {
+                                selectedItems[index] = v;
+                                categoryControllers[index].text = v ?? '';
+                              });
+                            },
+                            onAddTap: () {
+                              final route = switch (categories[index]) {
+                                'project' => '/library/projects',
+                                'habit' => '/library/habits',
+                                'path' => '/library/paths',
+                                _ => '/library',
+                              };
+                              Navigator.of(context).pushNamed(route);
+                            },
                             decoration: _inputDecoration('Category item'),
                           ),
                         ),
@@ -191,6 +220,79 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.primary),
       ),
+    );
+  }
+}
+
+class _CategoryItemField extends StatelessWidget {
+  final String type;
+  final String? value;
+  final List<String> projects;
+  final List<String> habits;
+  final List<String> paths;
+  final TextEditingController controller;
+  final ValueChanged<String?> onChanged;
+  final VoidCallback onAddTap;
+  final InputDecoration decoration;
+
+  const _CategoryItemField({
+    required this.type,
+    required this.value,
+    required this.projects,
+    required this.habits,
+    required this.paths,
+    required this.controller,
+    required this.onChanged,
+    required this.onAddTap,
+    required this.decoration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = switch (type) {
+      'project' => projects,
+      'habit' => habits,
+      'path' => paths,
+      _ => const <String>[],
+    };
+
+    if (type == 'work') {
+      return TextField(
+        controller: controller,
+        style: const TextStyle(color: AppColors.textPrimary),
+        decoration: decoration,
+      );
+    }
+
+    if (items.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Empty', style: AppTextStyles.body),
+          const SizedBox(height: 6),
+          OutlinedButton(
+            onPressed: onAddTap,
+            child: const Text('Add in Library'),
+          ),
+        ],
+      );
+    }
+
+    final effectiveValue = (value != null && items.contains(value)) ? value : null;
+
+    return DropdownButtonFormField<String>(
+      value: effectiveValue,
+      dropdownColor: AppColors.surface,
+      decoration: decoration,
+      items: items
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(e, overflow: TextOverflow.ellipsis),
+            ),
+          )
+          .toList(),
+      onChanged: onChanged,
     );
   }
 }
