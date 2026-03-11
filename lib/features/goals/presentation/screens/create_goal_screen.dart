@@ -133,7 +133,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     );
   }
 
-  void _saveGoals() {
+  Future<void> _saveGoals() async {
     final rows = List.generate(3, (index) {
       return {
         'title': titleControllers[index].text.trim(),
@@ -161,7 +161,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
       );
     });
 
-    ref.read(todayGoalsProvider.notifier).setGoals(goals);
+    await ref.read(todayGoalsProvider.notifier).setGoals(goals);
     if (mounted) Navigator.of(context).pop();
   }
 

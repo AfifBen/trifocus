@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
+import '../controllers/stats_controller.dart';
 
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(statsProvider);
+
     return AppScaffold(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -18,11 +22,9 @@ class StatsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('Your focus performance', style: AppTextStyles.body),
             const SizedBox(height: 24),
-            _StatCard(title: 'Sessions this week', value: '12'),
+            _StatCard(title: 'Total sessions', value: '${stats.totalSessions}'),
             const SizedBox(height: 12),
-            _StatCard(title: 'Focus hours', value: '6h 30m'),
-            const SizedBox(height: 12),
-            _StatCard(title: 'Completion rate', value: '84%'),
+            _StatCard(title: 'Streak', value: '${stats.streakDays} days'),
           ],
         ),
       ),
