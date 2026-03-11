@@ -1,17 +1,84 @@
-# trifocus
+# TriFocus
 
-A new Flutter project.
+A minimal productivity app built around the **Rule of 3**:
+- Pick **3 objectives** for today
+- Run **focus sessions** (with breaks)
+- Track progress, streaks, and history
+
+> Built with Flutter + Riverpod + GoRouter.
+
+## Features
+
+- **Today (Rule of 3)**: always shows 3 objective slots
+- **Focus timer** + **Break timer** (configurable)
+- **Session completion** increments objective progress
+- **Library** (Projects / Habits / Paths) with add / rename / delete
+- **Stats** (streak + derived metrics)
+- **History**: focus session log
+- **Settings**:
+  - Focus/Break duration
+  - Reset today progress
+  - Clear history
+  - Clear all data
+  - Export/Import backup (JSON)
+- **Daily local reminder notification**
+
+## Tech Stack
+
+- Flutter
+- Riverpod
+- go_router
+- shared_preferences
+- flutter_local_notifications
+
+## Project Structure
+
+High-level:
+
+- `lib/app/` — app bootstrap, router, theme
+- `lib/features/` — feature-first modules
+  - `today/` — Rule of 3 dashboard
+  - `goals/` — objectives
+  - `focus_session/` — focus + break timers
+  - `library/` — projects/habits/paths
+  - `stats/` — streak + derived stats
+  - `history/` — session logs
+  - `settings/` — settings + backup tools
+  - `notifications/` — daily reminder
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK (stable)
+- Android Studio / Xcode (for device tooling)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
+flutter run
+```
+
+### Clean rebuild
+
+```bash
+flutter clean
+flutter pub get
+flutter run
+```
+
+## Notes
+
+- On Android 13+, the app requests notification permission for reminders.
+- If you want to test the “first run” onboarding flow, clear app data or reinstall.
+
+## Roadmap (short)
+
+- Better analytics from history
+- UI polish + theming improvements
+- Cloud sync / auth (optional)
+
+## License
+
+Not specified yet.
