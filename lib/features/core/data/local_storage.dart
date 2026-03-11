@@ -14,6 +14,9 @@ class LocalStorage {
   static const _goalsDayKey = 'trifocus_goals_day';
   static const _focusDurationKey = 'trifocus_focus_duration';
   static const _breakDurationKey = 'trifocus_break_duration';
+  static const _reminderEnabledKey = 'trifocus_reminder_enabled';
+  static const _reminderHourKey = 'trifocus_reminder_hour';
+  static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
   static Future<List<Goal>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
@@ -57,6 +60,35 @@ class LocalStorage {
   static Future<void> saveBreakDurationSeconds(int seconds) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_breakDurationKey, seconds);
+  }
+
+  static Future<bool> loadReminderEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_reminderEnabledKey) ?? false;
+  }
+
+  static Future<void> saveReminderEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_reminderEnabledKey, enabled);
+  }
+
+  static Future<int?> loadReminderHour() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_reminderHourKey);
+  }
+
+  static Future<int?> loadReminderMinute() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_reminderMinuteKey);
+  }
+
+  static Future<void> saveReminderTime({
+    required int hour,
+    required int minute,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_reminderHourKey, hour);
+    await prefs.setInt(_reminderMinuteKey, minute);
   }
 
   static Future<Map<String, dynamic>> loadStats() async {
@@ -129,5 +161,8 @@ class LocalStorage {
     await prefs.remove(_goalsDayKey);
     await prefs.remove(_focusDurationKey);
     await prefs.remove(_breakDurationKey);
+    await prefs.remove(_reminderEnabledKey);
+    await prefs.remove(_reminderHourKey);
+    await prefs.remove(_reminderMinuteKey);
   }
 }

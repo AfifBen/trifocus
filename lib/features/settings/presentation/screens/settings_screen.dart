@@ -7,6 +7,7 @@ import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../core/data/local_storage.dart';
 import '../../../focus_session/presentation/controllers/focus_settings_controller.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
+import '../../../notifications/reminder_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -14,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(focusSettingsProvider);
+    final reminder = ref.watch(reminderProvider);
 
     return AppScaffold(
       appBar: AppBar(
@@ -63,6 +65,41 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 28),
+            const Text('Reminder', style: AppTextStyles.title),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              value: reminder.enabled,
+              onChanged: (v) => ref.read(reminderProvider.notifier).setEnabled(v),
+              title: const Text('Daily reminder'),
+              subtitle: Text(
+                'Set your 3 goals at ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}',
+                style: AppTextStyles.body,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: !reminder.enabled
+                    ? null
+                    : () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(
+                            hour: reminder.hour,
+                            minute: reminder.minute,
+                          ),
+                        );
+                        if (time == null) return;
+                        await ref.read(reminderProvider.notifier).setTime(
+                              hour: time.hour,
+                              minute: time.minute,
+                            );
+                      },
+                child: const Text('Change reminder time'),
+              ),
             ),
             const SizedBox(height: 28),
             const Text('Data', style: AppTextStyles.title),
@@ -120,6 +157,7 @@ class SettingsScreen extends ConsumerWidget {
                   // Refresh providers.
                   ref.invalidate(todayGoalsProvider);
                   ref.invalidate(focusSettingsProvider);
+                  ref.invalidate(reminderProvider);
 
                   if (context.mounted) context.go('/');
                 },
