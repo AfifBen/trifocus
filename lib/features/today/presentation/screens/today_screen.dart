@@ -32,9 +32,15 @@ class TodayScreen extends ConsumerWidget {
                       onCreate: () => _openCreate(context),
                     )
                   : ListView.separated(
-                      itemCount: goals.length,
+                      itemCount: 3,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
+                        if (index >= goals.length) {
+                          return _EmptyGoalCard(
+                            index: index,
+                            onTap: () => _openCreate(context),
+                          );
+                        }
                         final goal = goals[index];
                         return _GoalCard(
                           goal: goal,
@@ -48,7 +54,7 @@ class TodayScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: goals.isEmpty
+                onPressed: goals.length < 3
                     ? () => _openCreate(context)
                     : () => _openFocus(context),
                 style: ElevatedButton.styleFrom(
@@ -59,7 +65,7 @@ class TodayScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Start Focus'),
+                child: Text(goals.length < 3 ? 'Create Goals' : 'Start Focus'),
               ),
             ),
           ],
@@ -203,6 +209,55 @@ class _GoalCard extends StatelessWidget {
     };
     if (goal.categoryItem.isEmpty) return typeLabel;
     return '$typeLabel · ${goal.categoryItem}';
+  }
+}
+
+class _EmptyGoalCard extends StatelessWidget {
+  final int index;
+  final VoidCallback onTap;
+
+  const _EmptyGoalCard({required this.index, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.surfaceAlt,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text('Tap to set objective', style: AppTextStyles.body),
+            ),
+            const Icon(Icons.add, color: AppColors.primary),
+          ],
+        ),
+      ),
+    );
   }
 }
 
