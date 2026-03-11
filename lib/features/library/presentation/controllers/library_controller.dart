@@ -55,6 +55,14 @@ class LibraryController extends StateNotifier<LibraryState> {
     await LocalStorage.saveProjects(items);
   }
 
+  Future<void> renameProject(String id, String title) async {
+    final items = state.projects
+        .map((e) => e.id == id ? Project(id: e.id, title: title) : e)
+        .toList();
+    state = state.copyWith(projects: items);
+    await LocalStorage.saveProjects(items);
+  }
+
   Future<void> addHabit(Habit item) async {
     final items = [...state.habits, item];
     state = state.copyWith(habits: items);
@@ -63,6 +71,14 @@ class LibraryController extends StateNotifier<LibraryState> {
 
   Future<void> removeHabit(String id) async {
     final items = state.habits.where((e) => e.id != id).toList();
+    state = state.copyWith(habits: items);
+    await LocalStorage.saveHabits(items);
+  }
+
+  Future<void> renameHabit(String id, String title) async {
+    final items = state.habits
+        .map((e) => e.id == id ? Habit(id: e.id, title: title) : e)
+        .toList();
     state = state.copyWith(habits: items);
     await LocalStorage.saveHabits(items);
   }
@@ -78,4 +94,13 @@ class LibraryController extends StateNotifier<LibraryState> {
     state = state.copyWith(paths: items);
     await LocalStorage.savePaths(items);
   }
+
+  Future<void> renamePath(String id, String title) async {
+    final items = state.paths
+        .map((e) => e.id == id ? Path(id: e.id, title: title) : e)
+        .toList();
+    state = state.copyWith(paths: items);
+    await LocalStorage.savePaths(items);
+  }
 }
+
