@@ -165,4 +165,66 @@ class LocalStorage {
     await prefs.remove(_reminderHourKey);
     await prefs.remove(_reminderMinuteKey);
   }
+
+  static Future<Map<String, dynamic>> exportAll() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // We export already-serialized payloads for simplicity.
+    return {
+      'version': 1,
+      'goals': prefs.getString(_goalsKey),
+      'stats': prefs.getString(_statsKey),
+      'projects': prefs.getString(_projectsKey),
+      'habits': prefs.getString(_habitsKey),
+      'paths': prefs.getString(_pathsKey),
+      'goalsDay': prefs.getString(_goalsDayKey),
+      'focusDuration': prefs.getInt(_focusDurationKey),
+      'breakDuration': prefs.getInt(_breakDurationKey),
+      'reminderEnabled': prefs.getBool(_reminderEnabledKey),
+      'reminderHour': prefs.getInt(_reminderHourKey),
+      'reminderMinute': prefs.getInt(_reminderMinuteKey),
+    };
+  }
+
+  static Future<void> importAll(Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    Future<void> setString(String key, dynamic value) async {
+      if (value == null) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setString(key, value as String);
+      }
+    }
+
+    Future<void> setInt(String key, dynamic value) async {
+      if (value == null) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setInt(key, (value as num).toInt());
+      }
+    }
+
+    Future<void> setBool(String key, dynamic value) async {
+      if (value == null) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setBool(key, value as bool);
+      }
+    }
+
+    await setString(_goalsKey, data['goals']);
+    await setString(_statsKey, data['stats']);
+    await setString(_projectsKey, data['projects']);
+    await setString(_habitsKey, data['habits']);
+    await setString(_pathsKey, data['paths']);
+    await setString(_goalsDayKey, data['goalsDay']);
+
+    await setInt(_focusDurationKey, data['focusDuration']);
+    await setInt(_breakDurationKey, data['breakDuration']);
+
+    await setBool(_reminderEnabledKey, data['reminderEnabled']);
+    await setInt(_reminderHourKey, data['reminderHour']);
+    await setInt(_reminderMinuteKey, data['reminderMinute']);
+  }
 }
