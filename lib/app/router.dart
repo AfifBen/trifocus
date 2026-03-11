@@ -8,6 +8,9 @@ import '../features/focus_session/presentation/screens/session_complete_screen.d
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/stats/presentation/screens/stats_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
+import '../features/library/presentation/screens/projects_screen.dart';
+import '../features/library/presentation/screens/habits_screen.dart';
+import '../features/library/presentation/screens/paths_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
@@ -70,6 +73,18 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/library',
           builder: (context, state) => const LibraryScreen(),
+        ),
+        GoRoute(
+          path: '/library/projects',
+          builder: (context, state) => const ProjectsScreen(),
+        ),
+        GoRoute(
+          path: '/library/habits',
+          builder: (context, state) => const HabitsScreen(),
+        ),
+        GoRoute(
+          path: '/library/paths',
+          builder: (context, state) => const PathsScreen(),
         ),
         GoRoute(
           path: '/stats',

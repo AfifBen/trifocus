@@ -1,10 +1,16 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../goals/domain/models/goal.dart';
+import '../../library/domain/models/project.dart';
+import '../../library/domain/models/habit.dart';
+import '../../library/domain/models/path.dart';
 
 class LocalStorage {
   static const _goalsKey = 'trifocus_goals';
   static const _statsKey = 'trifocus_stats';
+  static const _projectsKey = 'trifocus_projects';
+  static const _habitsKey = 'trifocus_habits';
+  static const _pathsKey = 'trifocus_paths';
 
   static Future<List<Goal>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,5 +36,53 @@ class LocalStorage {
   static Future<void> saveStats(Map<String, dynamic> stats) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_statsKey, jsonEncode(stats));
+  }
+
+  static Future<List<Project>> loadProjects() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_projectsKey);
+    if (raw == null) return [];
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((item) => Project.fromJson(item)).toList();
+  }
+
+  static Future<void> saveProjects(List<Project> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _projectsKey,
+      jsonEncode(items.map((e) => e.toJson()).toList()),
+    );
+  }
+
+  static Future<List<Habit>> loadHabits() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_habitsKey);
+    if (raw == null) return [];
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((item) => Habit.fromJson(item)).toList();
+  }
+
+  static Future<void> saveHabits(List<Habit> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _habitsKey,
+      jsonEncode(items.map((e) => e.toJson()).toList()),
+    );
+  }
+
+  static Future<List<Path>> loadPaths() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pathsKey);
+    if (raw == null) return [];
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((item) => Path.fromJson(item)).toList();
+  }
+
+  static Future<void> savePaths(List<Path> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _pathsKey,
+      jsonEncode(items.map((e) => e.toJson()).toList()),
+    );
   }
 }
