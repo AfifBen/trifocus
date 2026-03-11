@@ -193,7 +193,12 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     });
 
     await ref.read(todayGoalsProvider.notifier).setGoals(goals);
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/today');
+    }
   }
 
   String _generateDescription(String title, String category, String type) {

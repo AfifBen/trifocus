@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../features/onboarding/presentation/screens/gate_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/today/presentation/screens/today_screen.dart';
+import '../features/goals/presentation/screens/create_goal_screen.dart';
 import '../features/focus_session/presentation/screens/focus_screen.dart';
 import '../features/focus_session/presentation/screens/break_screen.dart';
 import '../features/focus_session/presentation/screens/session_complete_screen.dart';
@@ -14,11 +16,19 @@ import '../features/library/presentation/screens/paths_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/today',
+  initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const GateScreen(),
+    ),
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/create-goals',
+      builder: (context, state) => const CreateGoalScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) {
