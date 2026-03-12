@@ -5,6 +5,7 @@ import '../../library/domain/models/project.dart';
 import '../../library/domain/models/habit.dart';
 import '../../library/domain/models/path.dart';
 import '../../history/domain/models/focus_log.dart';
+import '../../templates/domain/models/goal_template.dart';
 
 class LocalStorage {
   static const _goalsKey = 'trifocus_goals';
@@ -19,6 +20,7 @@ class LocalStorage {
   static const _logsKey = 'trifocus_focus_logs';
   static const _todayViewModeKey = 'trifocus_today_view_mode';
   static const _nextGoalReminderEnabledKey = 'trifocus_next_goal_reminder';
+  static const _templatesKey = 'trifocus_goal_templates';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -38,6 +40,18 @@ class LocalStorage {
   static Future<void> saveTodayViewMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_todayViewModeKey, mode);
+  }
+
+  static Future<List<GoalTemplate>> loadTemplates() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_templatesKey);
+    if (raw == null) return [];
+    return GoalTemplate.decodeList(raw);
+  }
+
+  static Future<void> saveTemplates(List<GoalTemplate> templates) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_templatesKey, GoalTemplate.encodeList(templates));
   }
 
   static Future<void> saveGoals(List<Goal> goals) async {
@@ -207,6 +221,7 @@ class LocalStorage {
     await prefs.remove(_logsKey);
     await prefs.remove(_todayViewModeKey);
     await prefs.remove(_nextGoalReminderEnabledKey);
+    await prefs.remove(_templatesKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -229,6 +244,7 @@ class LocalStorage {
       'focusLogs': prefs.getString(_logsKey),
       'todayViewMode': prefs.getString(_todayViewModeKey),
       'nextGoalReminderEnabled': prefs.getBool(_nextGoalReminderEnabledKey),
+      'templates': prefs.getString(_templatesKey),
     };
   }
 
@@ -276,5 +292,6 @@ class LocalStorage {
     await setString(_logsKey, data['focusLogs']);
     await setString(_todayViewModeKey, data['todayViewMode']);
     await setBool(_nextGoalReminderEnabledKey, data['nextGoalReminderEnabled']);
+    await setString(_templatesKey, data['templates']);
   }
 }

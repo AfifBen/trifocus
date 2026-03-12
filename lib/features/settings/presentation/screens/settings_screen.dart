@@ -9,6 +9,8 @@ import '../../../focus_session/presentation/controllers/focus_settings_controlle
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../notifications/reminder_controller.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
+import '../../../templates/presentation/controllers/templates_controller.dart';
+import '../../../templates/domain/models/goal_template.dart';
 import '../controllers/backup_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -18,6 +20,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(focusSettingsProvider);
     final reminder = ref.watch(reminderProvider);
+    final templates = ref.watch(templatesProvider);
 
     return AppScaffold(
       appBar: AppBar(
@@ -118,6 +121,122 @@ class SettingsScreen extends ConsumerWidget {
                 child: const Text('Change reminder time'),
               ),
             ),
+            const SizedBox(height: 28),
+            const Text('Templates', style: AppTextStyles.title),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final controller = TextEditingController(text: 'My Template');
+                  final name = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Save template'),
+                      content: TextField(
+                        controller: controller,
+                        autofocus: true,
+                        decoration:
+                            const InputDecoration(hintText: 'Template name'),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context)
+                              .pop(controller.text.trim()),
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (name == null || name.isEmpty) return;
+
+                  final goals = ref.read(todayGoalsProvider);
+                  if (goals.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No goals to save.')),
+                    );
+                    return;
+                  }
+
+                  await ref.read(templatesProvider.notifier).add(
+                        GoalTemplate(
+                          id: 'tpl_${DateTime.now().millisecondsSinceEpoch}',
+                          name: name,
+                          createdAt: DateTime.now(),
+                          goals: goals,
+                        ),
+                      );
+
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Template saved.')),
+                  );
+                },
+                child: const Text('Save current 3 goals as template'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (templates.isEmpty)
+              const Text('No templates yet', style: AppTextStyles.body)
+            else
+              Column(
+                children: templates.map((t) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              t.name,
+                              style: AppTextStyles.title,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(todayGoalsProvider.notifier)
+                                  .setGoals(
+                                    t.goals
+                                        .take(3)
+                                        .map((g) => g.copyWith(sessionsDone: 0))
+                                        .toList(),
+                                  );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Template applied.')),
+                                );
+                                context.go('/today');
+                              }
+                            },
+                            child: const Text('Apply'),
+                          ),
+                          IconButton(
+                            onPressed: () => ref
+                                .read(templatesProvider.notifier)
+                                .remove(t.id),
+                            icon: const Icon(Icons.delete,
+                                color: AppColors.textMuted),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 28),
             const Text('Backup', style: AppTextStyles.title),
             const SizedBox(height: 12),
