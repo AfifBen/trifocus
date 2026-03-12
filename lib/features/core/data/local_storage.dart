@@ -20,6 +20,7 @@ class LocalStorage {
   static const _logsKey = 'trifocus_focus_logs';
   static const _todayViewModeKey = 'trifocus_today_view_mode';
   static const _nextGoalReminderEnabledKey = 'trifocus_next_goal_reminder';
+  static const _nextGoalReminderLeadMinKey = 'trifocus_next_goal_lead_min';
   static const _templatesKey = 'trifocus_goal_templates';
   static const _hideDoneGoalsKey = 'trifocus_hide_done_goals';
   static const _reminderHourKey = 'trifocus_reminder_hour';
@@ -140,6 +141,16 @@ class LocalStorage {
     await prefs.setBool(_nextGoalReminderEnabledKey, enabled);
   }
 
+  static Future<int> loadNextGoalReminderLeadMinutes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_nextGoalReminderLeadMinKey) ?? 0;
+  }
+
+  static Future<void> saveNextGoalReminderLeadMinutes(int minutes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_nextGoalReminderLeadMinKey, minutes);
+  }
+
   static Future<Map<String, dynamic>> loadStats() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_statsKey);
@@ -232,6 +243,7 @@ class LocalStorage {
     await prefs.remove(_logsKey);
     await prefs.remove(_todayViewModeKey);
     await prefs.remove(_nextGoalReminderEnabledKey);
+    await prefs.remove(_nextGoalReminderLeadMinKey);
     await prefs.remove(_templatesKey);
     await prefs.remove(_hideDoneGoalsKey);
   }
@@ -256,6 +268,7 @@ class LocalStorage {
       'focusLogs': prefs.getString(_logsKey),
       'todayViewMode': prefs.getString(_todayViewModeKey),
       'nextGoalReminderEnabled': prefs.getBool(_nextGoalReminderEnabledKey),
+      'nextGoalReminderLeadMin': prefs.getInt(_nextGoalReminderLeadMinKey),
       'templates': prefs.getString(_templatesKey),
       'hideDoneGoals': prefs.getBool(_hideDoneGoalsKey),
     };
@@ -305,6 +318,7 @@ class LocalStorage {
     await setString(_logsKey, data['focusLogs']);
     await setString(_todayViewModeKey, data['todayViewMode']);
     await setBool(_nextGoalReminderEnabledKey, data['nextGoalReminderEnabled']);
+    await setInt(_nextGoalReminderLeadMinKey, data['nextGoalReminderLeadMin']);
     await setString(_templatesKey, data['templates']);
     await setBool(_hideDoneGoalsKey, data['hideDoneGoals']);
   }

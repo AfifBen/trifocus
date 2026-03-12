@@ -5,12 +5,23 @@ import '../../../../shared/widgets/app_scaffold.dart';
 import '../controllers/library_controller.dart';
 import '../../domain/models/path.dart';
 
-class PathsScreen extends ConsumerWidget {
+class PathsScreen extends ConsumerStatefulWidget {
   const PathsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PathsScreen> createState() => _PathsScreenState();
+}
+
+class _PathsScreenState extends ConsumerState<PathsScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(libraryProvider);
+    final q = _query.trim().toLowerCase();
+    final items = q.isEmpty
+        ? state.paths
+        : state.paths.where((p) => p.title.toLowerCase().contains(q)).toList();
 
     return AppScaffold(
       child: Padding(
@@ -19,12 +30,20 @@ class PathsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Paths', style: AppTextStyles.headline),
+            const SizedBox(height: 12),
+            TextField(
+              onChanged: (v) => setState(() => _query = v),
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search paths…',
+              ),
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: state.paths.length,
+                itemCount: items.length,
                 itemBuilder: (context, index) {
-                  final item = state.paths[index];
+                  final item = items[index];
                   return Dismissible(
                     key: ValueKey(item.id),
                     onDismissed: (_) =>

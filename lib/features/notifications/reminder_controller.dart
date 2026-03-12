@@ -7,12 +7,14 @@ class ReminderState {
   final int hour;
   final int minute;
   final bool nextGoalEnabled;
+  final int nextGoalLeadMinutes;
 
   const ReminderState({
     required this.enabled,
     required this.hour,
     required this.minute,
     required this.nextGoalEnabled,
+    required this.nextGoalLeadMinutes,
   });
 
   ReminderState copyWith({
@@ -20,12 +22,14 @@ class ReminderState {
     int? hour,
     int? minute,
     bool? nextGoalEnabled,
+    int? nextGoalLeadMinutes,
   }) {
     return ReminderState(
       enabled: enabled ?? this.enabled,
       hour: hour ?? this.hour,
       minute: minute ?? this.minute,
       nextGoalEnabled: nextGoalEnabled ?? this.nextGoalEnabled,
+      nextGoalLeadMinutes: nextGoalLeadMinutes ?? this.nextGoalLeadMinutes,
     );
   }
 }
@@ -42,6 +46,7 @@ class ReminderController extends StateNotifier<ReminderState> {
           hour: 9,
           minute: 0,
           nextGoalEnabled: false,
+          nextGoalLeadMinutes: 0,
         ));
 
   Future<void> load() async {
@@ -49,12 +54,14 @@ class ReminderController extends StateNotifier<ReminderState> {
     final hour = await LocalStorage.loadReminderHour();
     final minute = await LocalStorage.loadReminderMinute();
     final nextGoal = await LocalStorage.loadNextGoalReminderEnabled();
+    final leadMin = await LocalStorage.loadNextGoalReminderLeadMinutes();
 
     state = state.copyWith(
       enabled: enabled,
       hour: hour ?? state.hour,
       minute: minute ?? state.minute,
       nextGoalEnabled: nextGoal,
+      nextGoalLeadMinutes: leadMin,
     );
 
     await syncWithGoals();
@@ -78,8 +85,15 @@ class ReminderController extends StateNotifier<ReminderState> {
     await syncWithGoals();
   }
 
+  Future<void> setNextGoalLeadMinutes(int minutes) async {
+    state = state.copyWith(nextGoalLeadMinutes: minutes);
+    await LocalStorage.saveNextGoalReminderLeadMinutes(minutes);
+    await syncWithGoals();
+  }
+
   Future<void> syncWithGoals() async {
     final goals = await LocalStorage.loadGoals();
+    final leadMin = state.nextGoalLeadMinutes;
 
     // Daily reminder: only if user hasn't set 3 goals.
     if (!state.enabled) {
@@ -117,10 +131,16 @@ class ReminderController extends StateNotifier<ReminderState> {
 
     final next = candidates.first;
     final mins = next.scheduledMinutes!;
-    final when = DateTime(now.year, now.month, now.day, mins ~/ 60, mins % 60);
+    final when = DateTime(now.year, now.month, now.day, mins ~/ 60, mins % 60)
+        .subtract(Duration(minutes: leadMin));
+
+    // If lead time pushed it into the past, schedule at the goal time.
+    final effectiveWhen = when.isBefore(now)
+        ? DateTime(now.year, now.month, now.day, mins ~/ 60, mins % 60)
+        : when;
 
     await NotificationService.scheduleNextGoalReminder(
-      when: when,
+      when: effectiveWhen,
       title: next.title,
     );
   }

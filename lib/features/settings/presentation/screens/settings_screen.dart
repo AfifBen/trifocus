@@ -97,9 +97,34 @@ class SettingsScreen extends ConsumerWidget {
                   ref.read(reminderProvider.notifier).setNextGoalEnabled(v),
               title: const Text('Next scheduled goal reminder'),
               subtitle: const Text(
-                'Remind you at the next planned objective time.',
+                'Remind you for the next planned objective.',
                 style: AppTextStyles.body,
               ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Text('Lead time', style: AppTextStyles.body),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: reminder.nextGoalLeadMinutes,
+                    isExpanded: true,
+                    dropdownColor: AppColors.surface,
+                    decoration: _decoration('Lead'),
+                    items: const [
+                      DropdownMenuItem(value: 0, child: Text('At time')),
+                      DropdownMenuItem(value: 5, child: Text('5 min before')),
+                      DropdownMenuItem(value: 10, child: Text('10 min before')),
+                    ],
+                    onChanged: !reminder.nextGoalEnabled
+                        ? null
+                        : (v) => ref
+                            .read(reminderProvider.notifier)
+                            .setNextGoalLeadMinutes(v ?? 0),
+                  ),
+                )
+              ],
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -388,6 +413,65 @@ class SettingsScreen extends ConsumerWidget {
                   );
                 },
                 child: const Text('Export data (JSON)'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final logs = ref.read(historyProvider);
+                  final csv = StringBuffer('date,goal,duration_min,status\n');
+                  for (final l in logs) {
+                    final date = l.createdAt.toIso8601String();
+                    final goal = (l.goalTitle ?? '').replaceAll('"', '""');
+                    final mins = (l.durationSeconds / 60).round();
+                    final status = l.status.name;
+                    csv.writeln('"$date","$goal",$mins,$status');
+                  }
+                  await Clipboard.setData(ClipboardData(text: csv.toString()));
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('History CSV copied.')),
+                  );
+                },
+                child: const Text('Export history (CSV to clipboard)'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final logs = ref.read(historyProvider);
+                  final now = DateTime.now();
+                  final weekStart = now.subtract(Duration(days: now.weekday - 1));
+                  final weekStartDay =
+                      DateTime(weekStart.year, weekStart.month, weekStart.day);
+
+                  final weekLogs = logs
+                      .where((l) => l.createdAt.isAfter(weekStartDay))
+                      .where((l) => l.status.name == 'completed')
+                      .toList();
+
+                  final totalMin = weekLogs.fold<int>(
+                    0,
+                    (acc, l) => acc + (l.durationSeconds ~/ 60),
+                  );
+
+                  final report = StringBuffer();
+                  report.writeln('Weekly Focus Report');
+                  report.writeln('Week of ${weekStartDay.toIso8601String().split('T').first}');
+                  report.writeln('Total focus: ${totalMin} min');
+                  report.writeln('Sessions: ${weekLogs.length}');
+
+                  await Clipboard.setData(ClipboardData(text: report.toString()));
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Weekly report copied.')),
+                  );
+                },
+                child: const Text('Copy weekly report'),
               ),
             ),
             const SizedBox(height: 12),

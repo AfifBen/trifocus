@@ -5,12 +5,23 @@ import '../../../../shared/widgets/app_scaffold.dart';
 import '../controllers/library_controller.dart';
 import '../../domain/models/project.dart';
 
-class ProjectsScreen extends ConsumerWidget {
+class ProjectsScreen extends ConsumerStatefulWidget {
   const ProjectsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProjectsScreen> createState() => _ProjectsScreenState();
+}
+
+class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(libraryProvider);
+    final q = _query.trim().toLowerCase();
+    final items = q.isEmpty
+        ? state.projects
+        : state.projects.where((p) => p.title.toLowerCase().contains(q)).toList();
 
     return AppScaffold(
       child: Padding(
@@ -19,17 +30,24 @@ class ProjectsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Projects', style: AppTextStyles.headline),
+            const SizedBox(height: 12),
+            TextField(
+              onChanged: (v) => setState(() => _query = v),
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search projects…',
+              ),
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: state.projects.length,
+                itemCount: items.length,
                 itemBuilder: (context, index) {
-                  final item = state.projects[index];
+                  final item = items[index];
                   return Dismissible(
                     key: ValueKey(item.id),
-                    onDismissed: (_) => ref
-                        .read(libraryProvider.notifier)
-                        .removeProject(item.id),
+                    onDismissed: (_) =>
+                        ref.read(libraryProvider.notifier).removeProject(item.id),
                     child: ListTile(
                       title: Text(item.title),
                       trailing: const Icon(Icons.edit),

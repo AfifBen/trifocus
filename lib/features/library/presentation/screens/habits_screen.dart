@@ -5,12 +5,23 @@ import '../../../../shared/widgets/app_scaffold.dart';
 import '../controllers/library_controller.dart';
 import '../../domain/models/habit.dart';
 
-class HabitsScreen extends ConsumerWidget {
+class HabitsScreen extends ConsumerStatefulWidget {
   const HabitsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HabitsScreen> createState() => _HabitsScreenState();
+}
+
+class _HabitsScreenState extends ConsumerState<HabitsScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(libraryProvider);
+    final q = _query.trim().toLowerCase();
+    final items = q.isEmpty
+        ? state.habits
+        : state.habits.where((p) => p.title.toLowerCase().contains(q)).toList();
 
     return AppScaffold(
       child: Padding(
@@ -19,12 +30,20 @@ class HabitsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Habits', style: AppTextStyles.headline),
+            const SizedBox(height: 12),
+            TextField(
+              onChanged: (v) => setState(() => _query = v),
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search habits…',
+              ),
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: state.habits.length,
+                itemCount: items.length,
                 itemBuilder: (context, index) {
-                  final item = state.habits[index];
+                  final item = items[index];
                   return Dismissible(
                     key: ValueKey(item.id),
                     onDismissed: (_) =>
