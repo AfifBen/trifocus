@@ -33,6 +33,11 @@ class StatsScreen extends ConsumerWidget {
                           color: AppColors.textPrimary),
                     ),
                     IconButton(
+                      onPressed: () => context.push('/achievements'),
+                      icon: const Icon(Icons.emoji_events,
+                          color: AppColors.textPrimary),
+                    ),
+                    IconButton(
                       onPressed: () => context.push('/settings'),
                       icon: const Icon(Icons.settings,
                           color: AppColors.textPrimary),
