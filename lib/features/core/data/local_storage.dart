@@ -17,6 +17,7 @@ class LocalStorage {
   static const _breakDurationKey = 'trifocus_break_duration';
   static const _reminderEnabledKey = 'trifocus_reminder_enabled';
   static const _logsKey = 'trifocus_focus_logs';
+  static const _todayViewModeKey = 'trifocus_today_view_mode';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -26,6 +27,16 @@ class LocalStorage {
     if (raw == null) return [];
     final decoded = jsonDecode(raw) as List<dynamic>;
     return decoded.map((item) => Goal.fromJson(item)).toList();
+  }
+
+  static Future<String?> loadTodayViewMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_todayViewModeKey);
+  }
+
+  static Future<void> saveTodayViewMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_todayViewModeKey, mode);
   }
 
   static Future<void> saveGoals(List<Goal> goals) async {
@@ -183,6 +194,7 @@ class LocalStorage {
     await prefs.remove(_reminderHourKey);
     await prefs.remove(_reminderMinuteKey);
     await prefs.remove(_logsKey);
+    await prefs.remove(_todayViewModeKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -203,6 +215,7 @@ class LocalStorage {
       'reminderHour': prefs.getInt(_reminderHourKey),
       'reminderMinute': prefs.getInt(_reminderMinuteKey),
       'focusLogs': prefs.getString(_logsKey),
+      'todayViewMode': prefs.getString(_todayViewModeKey),
     };
   }
 
@@ -248,5 +261,6 @@ class LocalStorage {
     await setInt(_reminderMinuteKey, data['reminderMinute']);
 
     await setString(_logsKey, data['focusLogs']);
+    await setString(_todayViewModeKey, data['todayViewMode']);
   }
 }
