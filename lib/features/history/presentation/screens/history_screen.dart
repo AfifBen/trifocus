@@ -4,6 +4,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../controllers/history_controller.dart';
+import '../../domain/models/focus_log.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -29,6 +30,8 @@ class HistoryScreen extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final log = items[index];
                   final mins = (log.durationSeconds / 60).round();
+                  final statusLabel =
+                      log.status == FocusLogStatus.endedEarly ? 'Ended' : 'Completed';
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -50,7 +53,7 @@ class HistoryScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _formatDate(log.createdAt),
+                                '${_formatDate(log.createdAt)} • $statusLabel',
                                 style: AppTextStyles.body,
                               ),
                             ],

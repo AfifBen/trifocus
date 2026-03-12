@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
+import '../../../history/domain/models/focus_log.dart';
 import '../../../stats/presentation/controllers/stats_controller.dart';
 import '../../domain/models/achievement.dart';
 
 final achievementsProvider = Provider<List<Achievement>>((ref) {
   final streak = ref.watch(statsProvider).streakDays;
-  final totalSessions = ref.watch(historyProvider).length;
+  final totalSessions = ref
+      .watch(historyProvider)
+      .where((l) => l.status == FocusLogStatus.completed)
+      .length;
 
   bool unlockedStreak(int days) => streak >= days;
   bool unlockedSessions(int count) => totalSessions >= count;

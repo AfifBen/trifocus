@@ -10,6 +10,7 @@ import '../../../history/domain/models/focus_log.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../controllers/active_goal_controller.dart';
 import '../controllers/focus_timer_controller.dart';
+import '../controllers/session_result_controller.dart';
 
 class SessionCompleteScreen extends ConsumerStatefulWidget {
   const SessionCompleteScreen({super.key});
@@ -54,6 +55,8 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
     final focusTimer = ref.read(focusTimerProvider);
     final duration = focusTimer.totalSeconds;
 
+    final result = ref.read(sessionResultProvider);
+
     await ref.read(historyProvider.notifier).add(
           FocusLog(
             id: 'log_${DateTime.now().millisecondsSinceEpoch}',
@@ -61,6 +64,9 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
             goalTitle: title,
             durationSeconds: duration,
             createdAt: DateTime.now(),
+            status: result == SessionResult.endedEarly
+                ? FocusLogStatus.endedEarly
+                : FocusLogStatus.completed,
           ),
         );
   }

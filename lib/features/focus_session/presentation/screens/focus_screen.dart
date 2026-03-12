@@ -9,6 +9,7 @@ import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../controllers/active_goal_controller.dart';
 import '../controllers/focus_settings_controller.dart';
 import '../controllers/focus_timer_controller.dart';
+import '../controllers/session_result_controller.dart';
 
 class FocusScreen extends ConsumerWidget {
   const FocusScreen({super.key});
@@ -32,6 +33,7 @@ class FocusScreen extends ConsumerWidget {
       Future.microtask(() {
         if (context.mounted) {
           notifier.pause();
+          ref.read(sessionResultProvider.notifier).setCompleted();
           context.go('/break');
         }
       });
@@ -235,6 +237,7 @@ class FocusScreen extends ConsumerWidget {
               child: TextButton(
                 onPressed: () {
                   HapticFeedback.mediumImpact();
+                  ref.read(sessionResultProvider.notifier).setEndedEarly();
                   notifier.reset();
                   context.go('/session-complete');
                 },
