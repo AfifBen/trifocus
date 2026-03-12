@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TriFocus</title>
+    <meta name="description" content="TriFocus — Rule of 3 daily objectives + Focus/Break timer" />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --surface: #121a2b;
+        --surface2: #182235;
+        --border: #1a233f;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #7c5cff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,0.25), transparent 60%), var(--bg);
+        color: var(--text);
+      }
+      .container { max-width: 980px; margin: 0 auto; padding: 48px 20px; }
+      .card {
+        background: rgba(18,26,43,0.85);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 28px;
+        backdrop-filter: blur(8px);
+      }
+      .header { display: flex; gap: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+      h1 { margin: 0; font-size: 44px; letter-spacing: 0.5px; }
+      .tag { display: inline-block; padding: 6px 10px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+      p { color: var(--muted); line-height: 1.6; }
+      .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 22px; }
+      .feature { grid-column: span 6; padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
+      .feature h3 { margin: 0 0 6px; font-size: 16px; }
+      .feature p { margin: 0; font-size: 14px; }
+      .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+      .btn {
+        display: inline-block;
+        padding: 10px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn.primary { background: var(--primary); border-color: rgba(255,255,255,0.14); }
+      .shots { margin-top: 28px; }
+      .shots h2 { margin: 0 0 10px; font-size: 18px; }
+      .shot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .shot {
+        border: 1px dashed rgba(148,163,184,0.35);
+        border-radius: 18px;
+        padding: 18px;
+        background: rgba(24,34,53,0.35);
+        color: var(--muted);
+        text-align: center;
+        min-height: 140px;
+        display: grid;
+        place-items: center;
+      }
+      footer { margin-top: 20px; color: var(--muted); font-size: 13px; }
+      code { background: rgba(24,34,53,0.9); padding: 2px 6px; border-radius: 10px; border: 1px solid var(--border); }
+      @media (max-width: 760px) {
+        .feature { grid-column: span 12; }
+        .shot-grid { grid-template-columns: 1fr; }
+        h1 { font-size: 36px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="header">
+          <div>
+            <div class="tag">Flutter • Rule of 3 • Focus Timer</div>
+            <h1>TriFocus</h1>
+            <p>
+              A minimal productivity app built around one idea: <b>pick 3 objectives for today</b>, then focus deeply.
+            </p>
+            <div class="cta">
+              <a class="btn primary" href="https://github.com/AfifBen/trifocus" target="_blank" rel="noreferrer">View on GitHub</a>
+              <a class="btn" href="https://afifben.github.io/trifocus" target="_blank" rel="noreferrer">GitHub Pages</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="feature">
+            <h3>Rule of 3</h3>
+            <p>Set three objectives and track cycles per goal.</p>
+          </div>
+          <div class="feature">
+            <h3>Focus + Break</h3>
+            <p>Configurable timers with session completion flow.</p>
+          </div>
+          <div class="feature">
+            <h3>Library</h3>
+            <p>Projects / Habits / Paths with add, rename, and delete.</p>
+          </div>
+          <div class="feature">
+            <h3>Stats & History</h3>
+            <p>Streaks and derived metrics from session logs.</p>
+          </div>
+        </div>
+
+        <div class="shots">
+          <h2>Screenshots</h2>
+          <p>Add screenshots in <code>docs/screenshots/</code> and update this section.</p>
+          <div class="shot-grid">
+            <div class="shot">Today</div>
+            <div class="shot">Focus</div>
+            <div class="shot">Stats</div>
+          </div>
+        </div>
+
+        <footer>
+          © 2026 AfifBen • TriFocus
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
