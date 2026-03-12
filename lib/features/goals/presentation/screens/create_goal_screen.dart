@@ -146,7 +146,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _saveGoals,
+                  onPressed: _canSave() ? _saveGoals : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textPrimary,
@@ -155,7 +155,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text('Save'),
+                  child: Text(_canSave() ? 'Save' : 'Fill 3 goals to save'),
                 ),
               ),
             ),
@@ -164,7 +164,13 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     );
   }
 
+  bool _canSave() {
+    return titleControllers.every((c) => c.text.trim().isNotEmpty);
+  }
+
   Future<void> _saveGoals() async {
+    if (!_canSave()) return;
+
     final rows = List.generate(3, (index) {
       return {
         'title': titleControllers[index].text.trim(),
@@ -173,9 +179,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
         'categoryItem': categoryControllers[index].text.trim(),
         'description': descriptionControllers[index].text.trim(),
       };
-    }).where((row) => (row['title'] as String).isNotEmpty).toList();
-
-    if (rows.isEmpty) return;
+    });
 
     final goals = List.generate(rows.length, (index) {
       final row = rows[index];
