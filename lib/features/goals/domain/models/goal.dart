@@ -6,6 +6,7 @@ class Goal {
   final String description;
   final int sessionsDone;
   final int sessionsTotal;
+  final int? scheduledMinutes; // minutes from midnight
 
   const Goal({
     required this.id,
@@ -15,6 +16,7 @@ class Goal {
     this.description = '',
     this.sessionsDone = 0,
     this.sessionsTotal = 4,
+    this.scheduledMinutes,
   });
 
   Goal copyWith({
@@ -24,6 +26,8 @@ class Goal {
     String? description,
     int? sessionsDone,
     int? sessionsTotal,
+    int? scheduledMinutes,
+    bool clearScheduledMinutes = false,
   }) {
     return Goal(
       id: id,
@@ -33,6 +37,8 @@ class Goal {
       description: description ?? this.description,
       sessionsDone: sessionsDone ?? this.sessionsDone,
       sessionsTotal: sessionsTotal ?? this.sessionsTotal,
+      scheduledMinutes:
+          clearScheduledMinutes ? null : (scheduledMinutes ?? this.scheduledMinutes),
     );
   }
 
@@ -44,6 +50,7 @@ class Goal {
         'description': description,
         'sessionsDone': sessionsDone,
         'sessionsTotal': sessionsTotal,
+        'scheduledMinutes': scheduledMinutes,
       };
 
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
@@ -54,5 +61,6 @@ class Goal {
         description: json['description'] as String? ?? '',
         sessionsDone: json['sessionsDone'] as int? ?? 0,
         sessionsTotal: json['sessionsTotal'] as int? ?? 4,
+        scheduledMinutes: (json['scheduledMinutes'] as num?)?.toInt(),
       );
 }
