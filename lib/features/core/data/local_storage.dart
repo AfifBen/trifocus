@@ -21,6 +21,7 @@ class LocalStorage {
   static const _todayViewModeKey = 'trifocus_today_view_mode';
   static const _nextGoalReminderEnabledKey = 'trifocus_next_goal_reminder';
   static const _templatesKey = 'trifocus_goal_templates';
+  static const _hideDoneGoalsKey = 'trifocus_hide_done_goals';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -52,6 +53,16 @@ class LocalStorage {
   static Future<void> saveTemplates(List<GoalTemplate> templates) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_templatesKey, GoalTemplate.encodeList(templates));
+  }
+
+  static Future<bool> loadHideDoneGoals() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hideDoneGoalsKey) ?? false;
+  }
+
+  static Future<void> saveHideDoneGoals(bool hide) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hideDoneGoalsKey, hide);
   }
 
   static Future<void> saveGoals(List<Goal> goals) async {
@@ -222,6 +233,7 @@ class LocalStorage {
     await prefs.remove(_todayViewModeKey);
     await prefs.remove(_nextGoalReminderEnabledKey);
     await prefs.remove(_templatesKey);
+    await prefs.remove(_hideDoneGoalsKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -245,6 +257,7 @@ class LocalStorage {
       'todayViewMode': prefs.getString(_todayViewModeKey),
       'nextGoalReminderEnabled': prefs.getBool(_nextGoalReminderEnabledKey),
       'templates': prefs.getString(_templatesKey),
+      'hideDoneGoals': prefs.getBool(_hideDoneGoalsKey),
     };
   }
 
@@ -293,5 +306,6 @@ class LocalStorage {
     await setString(_todayViewModeKey, data['todayViewMode']);
     await setBool(_nextGoalReminderEnabledKey, data['nextGoalReminderEnabled']);
     await setString(_templatesKey, data['templates']);
+    await setBool(_hideDoneGoalsKey, data['hideDoneGoals']);
   }
 }

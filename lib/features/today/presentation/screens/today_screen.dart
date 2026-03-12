@@ -9,6 +9,7 @@ import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../goals/presentation/screens/create_goal_screen.dart';
 import '../../../goals/presentation/screens/goal_detail_screen.dart';
 import '../controllers/today_view_controller.dart';
+import '../controllers/hide_done_controller.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -18,8 +19,17 @@ class TodayScreen extends ConsumerWidget {
     final goals = ref.watch(todayGoalsProvider);
 
     final viewMode = ref.watch(todayViewProvider);
+    final hideDone = ref.watch(hideDoneProvider);
 
-    final sortedGoals = [...goals]..sort((a, b) {
+    final visibleGoals = hideDone
+        ? goals.where((g) => g.sessionsDone < g.sessionsTotal).toList()
+        : goals;
+
+    final sortedGoals = [...visibleGoals]..sort((a, b) {
+      final ad = a.sessionsDone >= a.sessionsTotal;
+      final bd = b.sessionsDone >= b.sessionsTotal;
+      if (ad != bd) return ad ? 1 : -1;
+
       final am = a.scheduledMinutes;
       final bm = b.scheduledMinutes;
       if (am == null && bm == null) return 0;
@@ -38,14 +48,28 @@ class TodayScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Today', style: AppTextStyles.headline),
-                IconButton(
-                  onPressed: () => ref.read(todayViewProvider.notifier).toggle(),
-                  icon: Icon(
-                    viewMode == TodayViewMode.cards
-                        ? Icons.view_agenda
-                        : Icons.view_module,
-                    color: AppColors.textPrimary,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () =>
+                          ref.read(hideDoneProvider.notifier).toggle(),
+                      icon: Icon(
+                        hideDone ? Icons.visibility_off : Icons.visibility,
+                        color: AppColors.textPrimary,
+                      ),
+                      tooltip: hideDone ? 'Show done' : 'Hide done',
+                    ),
+                    IconButton(
+                      onPressed: () =>
+                          ref.read(todayViewProvider.notifier).toggle(),
+                      icon: Icon(
+                        viewMode == TodayViewMode.cards
+                            ? Icons.view_agenda
+                            : Icons.view_module,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -219,6 +243,7 @@ class _GoalCard extends StatelessWidget {
     final progress = goal.sessionsTotal == 0
         ? 0.0
         : goal.sessionsDone / goal.sessionsTotal;
+    final isDone = goal.sessionsTotal > 0 && goal.sessionsDone >= goal.sessionsTotal;
 
     return Material(
       color: Colors.transparent,
@@ -236,7 +261,31 @@ class _GoalCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(goal.title, style: AppTextStyles.title),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(goal.title, style: AppTextStyles.title),
+                  ),
+                  if (isDone)
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'DONE',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               if (goal.description.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(goal.description, style: AppTextStyles.body),
@@ -271,13 +320,12 @@ class _GoalCard extends StatelessWidget {
                     style: AppTextStyles.body,
                   ),
                   InkWell(
-                    onTap: onTimeTap,
-                    onLongPress: goal.scheduledMinutes == null
-                        ? null
-                        : onTimeClear,
+                    onTap: isDone ? null : onTimeTap,
+                    onLongPress:
+                        (isDone || goal.scheduledMinutes == null) ? null : onTimeClear,
                     child: Text(
                       goal.scheduledMinutes == null
-                          ? 'Set time'
+                          ? (isDone ? '' : 'Set time')
                           : _formatTime(goal.scheduledMinutes!),
                       style: AppTextStyles.body,
                     ),
@@ -386,7 +434,8 @@ class _TimelineView extends StatelessWidget {
       itemBuilder: (context, index) {
         final g = goals[index];
         final t = g.scheduledMinutes;
-        final timeLabel = t == null ? 'Set time' : _formatTime(t);
+        final isDone = g.sessionsTotal > 0 && g.sessionsDone >= g.sessionsTotal;
+        final timeLabel = t == null ? (isDone ? 'Done' : 'Set time') : _formatTime(t);
         final isPast = t != null && t <= nowMin;
 
         return GestureDetector(
@@ -401,8 +450,8 @@ class _TimelineView extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => onGoalTimeTap(g),
-                  onLongPress: g.scheduledMinutes == null
+                  onTap: isDone ? null : () => onGoalTimeTap(g),
+                  onLongPress: (isDone || g.scheduledMinutes == null)
                       ? null
                       : () => onGoalTimeClear(g),
                   borderRadius: BorderRadius.circular(14),
