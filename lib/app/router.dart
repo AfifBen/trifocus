@@ -16,6 +16,8 @@ import '../features/library/presentation/screens/paths_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/achievements/presentation/screens/achievements_screen.dart';
+import '../features/auth/presentation/screens/auth_screen.dart';
+import '../features/auth/presentation/screens/account_screen.dart';
 import '../shared/widgets/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
@@ -44,6 +46,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/achievements',
       builder: (context, state) => const AchievementsScreen(),
+    ),
+    GoRoute(
+      path: '/auth',
+      builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: '/account',
+      builder: (context, state) => const AccountScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) {

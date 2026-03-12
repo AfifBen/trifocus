@@ -14,6 +14,7 @@ import '../../../notifications/reminder_controller.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../templates/presentation/controllers/templates_controller.dart';
 import '../../../templates/domain/models/goal_template.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/backup_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -40,6 +41,23 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text('Account', style: AppTextStyles.title),
+            const SizedBox(height: 12),
+            ref.watch(authStateProvider).when(
+                  data: (user) {
+                    final signedIn = user != null;
+                    return SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () => context.push(signedIn ? '/account' : '/auth'),
+                        child: Text(signedIn ? 'Account' : 'Sign in to sync'),
+                      ),
+                    );
+                  },
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, st) => const SizedBox.shrink(),
+                ),
+            const SizedBox(height: 28),
             const Text('Timer', style: AppTextStyles.title),
             const SizedBox(height: 12),
             Row(
