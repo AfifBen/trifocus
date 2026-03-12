@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -156,9 +159,10 @@ class SettingsScreen extends ConsumerWidget {
                   if (name == null || name.isEmpty) return;
 
                   final goals = ref.read(todayGoalsProvider);
-                  if (goals.isEmpty) {
+                  if (goals.length < 3) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No goals to save.')),
+                      const SnackBar(
+                          content: Text('You need 3 goals to create a template.')),
                     );
                     return;
                   }
@@ -178,6 +182,63 @@ class SettingsScreen extends ConsumerWidget {
                   );
                 },
                 child: const Text('Save current 3 goals as template'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final controller = TextEditingController();
+                  final json = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Import template JSON'),
+                      content: SizedBox(
+                        width: 500,
+                        child: TextField(
+                          controller: controller,
+                          maxLines: 10,
+                          decoration: const InputDecoration(
+                            hintText: 'Paste template JSON here',
+                          ),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context)
+                              .pop(controller.text.trim()),
+                          child: const Text('Import'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (json == null || json.isEmpty) return;
+
+                  try {
+                    final decoded = jsonDecode(json) as Map<String, dynamic>;
+                    final tpl = GoalTemplate.fromJson(decoded).copyWith(
+                      id: 'tpl_${DateTime.now().millisecondsSinceEpoch}',
+                      createdAt: DateTime.now(),
+                    );
+                    await ref.read(templatesProvider.notifier).add(tpl);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Template imported.')),
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Import failed: $e')),
+                    );
+                  }
+                },
+                child: const Text('Import template (JSON)'),
               ),
             ),
             const SizedBox(height: 12),
@@ -225,11 +286,72 @@ class SettingsScreen extends ConsumerWidget {
                             child: const Text('Apply'),
                           ),
                           IconButton(
+                            onPressed: () async {
+                              final controller =
+                                  TextEditingController(text: t.name);
+                              final name = await showDialog<String>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Rename template'),
+                                  content: TextField(
+                                    controller: controller,
+                                    autofocus: true,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Template name',
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.of(context)
+                                          .pop(controller.text.trim()),
+                                      child: const Text('Save'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (name == null || name.isEmpty) return;
+                              await ref
+                                  .read(templatesProvider.notifier)
+                                  .rename(t.id, name);
+                            },
+                            icon: const Icon(Icons.edit,
+                                color: AppColors.textMuted),
+                            tooltip: 'Rename',
+                          ),
+                          IconButton(
+                            onPressed: () => ref
+                                .read(templatesProvider.notifier)
+                                .duplicate(t.id),
+                            icon: const Icon(Icons.copy,
+                                color: AppColors.textMuted),
+                            tooltip: 'Duplicate',
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              final json = const JsonEncoder.withIndent('  ')
+                                  .convert(t.toJson());
+                              Clipboard.setData(ClipboardData(text: json));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Template JSON copied.')),
+                              );
+                            },
+                            icon: const Icon(Icons.share,
+                                color: AppColors.textMuted),
+                            tooltip: 'Copy JSON',
+                          ),
+                          IconButton(
                             onPressed: () => ref
                                 .read(templatesProvider.notifier)
                                 .remove(t.id),
                             icon: const Icon(Icons.delete,
                                 color: AppColors.textMuted),
+                            tooltip: 'Delete',
                           )
                         ],
                       ),

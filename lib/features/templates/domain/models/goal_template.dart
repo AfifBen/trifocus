@@ -15,6 +15,20 @@ class GoalTemplate {
     required this.goals,
   });
 
+  GoalTemplate copyWith({
+    String? id,
+    String? name,
+    DateTime? createdAt,
+    List<Goal>? goals,
+  }) {
+    return GoalTemplate(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+      goals: goals ?? this.goals,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,

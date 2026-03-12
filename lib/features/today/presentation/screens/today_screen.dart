@@ -8,6 +8,7 @@ import '../../../goals/domain/models/goal.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../goals/presentation/screens/create_goal_screen.dart';
 import '../../../goals/presentation/screens/goal_detail_screen.dart';
+import '../../../templates/presentation/controllers/templates_controller.dart';
 import '../controllers/today_view_controller.dart';
 import '../controllers/hide_done_controller.dart';
 
@@ -79,7 +80,16 @@ class TodayScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             const Text('Three goals. One day.', style: AppTextStyles.body),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _applyTemplate(context, ref),
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('Apply template'),
+              ),
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: goals.isEmpty
                   ? _EmptyState(
@@ -141,6 +151,61 @@ class TodayScreen extends ConsumerWidget {
   void _openCreate(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const CreateGoalScreen()),
+    );
+  }
+
+  Future<void> _applyTemplate(BuildContext context, WidgetRef ref) async {
+    final templates = ref.read(templatesProvider);
+    if (templates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No templates yet.')),
+      );
+      return;
+    }
+
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: Text('Choose a template', style: AppTextStyles.title),
+              ),
+              ...templates.map(
+                (t) => ListTile(
+                  title: Text(t.name, style: AppTextStyles.title),
+                  subtitle: Text(
+                    t.goals.take(3).map((g) => g.title).join(' • '),
+                    style: AppTextStyles.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () => Navigator.of(context).pop(t.id),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selected == null) return;
+
+    final tpl = templates.firstWhere((t) => t.id == selected);
+    await ref.read(todayGoalsProvider.notifier).setGoals(
+          tpl.goals.take(3).map((g) => g.copyWith(sessionsDone: 0)).toList(),
+        );
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Template applied.')),
     );
   }
 

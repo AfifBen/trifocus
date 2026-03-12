@@ -27,4 +27,38 @@ class TemplatesController extends StateNotifier<List<GoalTemplate>> {
     state = next;
     await LocalStorage.saveTemplates(next);
   }
+
+  Future<void> rename(String id, String name) async {
+    final next = state
+        .map(
+          (t) => t.id == id
+              ? GoalTemplate(
+                  id: t.id,
+                  name: name,
+                  createdAt: t.createdAt,
+                  goals: t.goals,
+                )
+              : t,
+        )
+        .toList();
+    state = next;
+    await LocalStorage.saveTemplates(next);
+  }
+
+  Future<void> duplicate(String id) async {
+    final tpl = state.where((t) => t.id == id).firstOrNull;
+    if (tpl == null) return;
+    await add(
+      GoalTemplate(
+        id: 'tpl_${DateTime.now().millisecondsSinceEpoch}',
+        name: '${tpl.name} (copy)',
+        createdAt: DateTime.now(),
+        goals: tpl.goals,
+      ),
+    );
+  }
+}
+
+extension _FirstOrNull<T> on Iterable<T> {
+  T? get firstOrNull => isEmpty ? null : first;
 }
