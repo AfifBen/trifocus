@@ -81,7 +81,17 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) => ref.read(reminderProvider.notifier).setEnabled(v),
               title: const Text('Daily reminder'),
               subtitle: Text(
-                'Set your 3 goals at ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}',
+                'Only if goals are not set (less than 3). Time: ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}',
+                style: AppTextStyles.body,
+              ),
+            ),
+            SwitchListTile(
+              value: reminder.nextGoalEnabled,
+              onChanged: (v) =>
+                  ref.read(reminderProvider.notifier).setNextGoalEnabled(v),
+              title: const Text('Next scheduled goal reminder'),
+              subtitle: const Text(
+                'Remind you at the next planned objective time.',
                 style: AppTextStyles.body,
               ),
             ),

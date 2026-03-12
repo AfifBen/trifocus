@@ -79,6 +79,8 @@ class TodayScreen extends ConsumerWidget {
                       : _TimelineView(
                           goals: sortedGoals,
                           onGoalLongPress: (g) => _openDetail(context, g),
+                          onGoalTimeTap: (g) => _setTime(context, g, ref),
+                          onGoalTimeClear: (g) => _clearTime(g, ref),
                         ),
             ),
             const SizedBox(height: 12),
@@ -115,6 +117,28 @@ class TodayScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => GoalDetailScreen(goal: goal)),
     );
+  }
+
+  Future<void> _setTime(BuildContext context, Goal goal, WidgetRef ref) async {
+    final initial = goal.scheduledMinutes == null
+        ? const TimeOfDay(hour: 9, minute: 0)
+        : TimeOfDay(
+            hour: goal.scheduledMinutes! ~/ 60,
+            minute: goal.scheduledMinutes! % 60,
+          );
+    final picked = await showTimePicker(context: context, initialTime: initial);
+    if (picked == null) return;
+
+    final minutes = picked.hour * 60 + picked.minute;
+    await ref
+        .read(todayGoalsProvider.notifier)
+        .updateGoal(goal.copyWith(scheduledMinutes: minutes));
+  }
+
+  Future<void> _clearTime(Goal goal, WidgetRef ref) async {
+    await ref.read(todayGoalsProvider.notifier).updateGoal(
+          goal.copyWith(clearScheduledMinutes: true),
+        );
   }
 
   void _openFocus(BuildContext context) {
@@ -240,11 +264,18 @@ class _GoalCard extends StatelessWidget {
                   '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
                   style: AppTextStyles.body,
                 ),
-                if (goal.scheduledMinutes != null)
-                  Text(
-                    _formatTime(goal.scheduledMinutes!),
+                InkWell(
+                  onTap: () => _setTime(context, goal, ref),
+                  onLongPress: goal.scheduledMinutes == null
+                      ? null
+                      : () => _clearTime(goal, ref),
+                  child: Text(
+                    goal.scheduledMinutes == null
+                        ? 'Set time'
+                        : _formatTime(goal.scheduledMinutes!),
                     style: AppTextStyles.body,
                   ),
+                ),
               ],
             ),
             ],
@@ -328,8 +359,15 @@ class _EmptyGoalCard extends StatelessWidget {
 class _TimelineView extends StatelessWidget {
   final List<Goal> goals;
   final ValueChanged<Goal> onGoalLongPress;
+  final ValueChanged<Goal> onGoalTimeTap;
+  final ValueChanged<Goal> onGoalTimeClear;
 
-  const _TimelineView({required this.goals, required this.onGoalLongPress});
+  const _TimelineView({
+    required this.goals,
+    required this.onGoalLongPress,
+    required this.onGoalTimeTap,
+    required this.onGoalTimeClear,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +380,7 @@ class _TimelineView extends StatelessWidget {
       itemBuilder: (context, index) {
         final g = goals[index];
         final t = g.scheduledMinutes;
-        final timeLabel = t == null ? 'No time' : _formatTime(t);
+        final timeLabel = t == null ? 'Set time' : _formatTime(t);
         final isPast = t != null && t <= nowMin;
 
         return GestureDetector(
@@ -356,22 +394,29 @@ class _TimelineView extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 72,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceAlt,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Text(
-                    timeLabel,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                InkWell(
+                  onTap: () => onGoalTimeTap(g),
+                  onLongPress: g.scheduledMinutes == null
+                      ? null
+                      : () => onGoalTimeClear(g),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: 72,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Text(
+                      timeLabel,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
