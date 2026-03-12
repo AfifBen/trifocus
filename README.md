@@ -1,3 +1,8 @@
+![Flutter](https://img.shields.io/badge/flutter-%3E%3D3.0-02569B?logo=flutter&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-MVP-yellow)
+![Platform](https://img.shields.io/badge/platform-android%20%7C%20ios-blue)
+
 # TriFocus
 
 A minimal productivity app built around the **Rule of 3**:
