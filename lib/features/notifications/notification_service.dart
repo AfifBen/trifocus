@@ -7,6 +7,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static const int dailyReminderId = 1001;
+  static const int nextGoalReminderId = 1002;
 
   static Future<void> init() async {
     tz.initializeTimeZones();
@@ -25,6 +26,10 @@ class NotificationService {
 
   static Future<void> cancelDailyReminder() async {
     await _plugin.cancel(dailyReminderId);
+  }
+
+  static Future<void> cancelNextGoalReminder() async {
+    await _plugin.cancel(nextGoalReminderId);
   }
 
   static Future<void> scheduleDailyReminder({
@@ -65,6 +70,34 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  static Future<void> scheduleNextGoalReminder({
+    required DateTime when,
+    required String title,
+  }) async {
+    final scheduled = tz.TZDateTime.from(when, tz.local);
+
+    const androidDetails = AndroidNotificationDetails(
+      'next_goal',
+      'Next Goal',
+      channelDescription: 'Reminder for your next scheduled objective',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+    );
+
+    const details = NotificationDetails(android: androidDetails);
+
+    await _plugin.zonedSchedule(
+      nextGoalReminderId,
+      'TriFocus',
+      'Next: $title',
+      scheduled,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 }
