@@ -84,6 +84,11 @@ flutter run
 - UI polish + theming improvements
 - Cloud sync / auth (optional)
 
+## GitHub Pages
+
+A simple landing page is deployed via GitHub Pages:
+- https://afifben.github.io/trifocus
+
 ## License
 
-Not specified yet.
+MIT
