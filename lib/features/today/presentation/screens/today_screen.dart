@@ -22,7 +22,11 @@ class TodayScreen extends ConsumerWidget {
     final hideDone = ref.watch(hideDoneProvider);
 
     final visibleGoals = hideDone
-        ? goals.where((g) => g.sessionsDone < g.sessionsTotal).toList()
+        ? goals
+            .where(
+              (g) => g.sessionsTotal <= 0 || g.sessionsDone < g.sessionsTotal,
+            )
+            .toList()
         : goals;
 
     final sortedGoals = [...visibleGoals]..sort((a, b) {
@@ -83,10 +87,11 @@ class TodayScreen extends ConsumerWidget {
                     )
                   : viewMode == TodayViewMode.cards
                       ? ListView.separated(
-                          itemCount: 3,
+                          // When hiding done goals, show only visible goals (no empty slots).
+                          itemCount: hideDone ? sortedGoals.length : 3,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
-                            if (index >= sortedGoals.length) {
+                            if (!hideDone && index >= sortedGoals.length) {
                               return _EmptyGoalCard(
                                 index: index,
                                 onTap: () => _openCreate(context),
