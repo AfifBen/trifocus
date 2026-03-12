@@ -16,6 +16,15 @@ class TodayScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goals = ref.watch(todayGoalsProvider);
 
+    final sortedGoals = [...goals]..sort((a, b) {
+        final am = a.scheduledMinutes;
+        final bm = b.scheduledMinutes;
+        if (am == null && bm == null) return 0;
+        if (am == null) return 1;
+        if (bm == null) return -1;
+        return am.compareTo(bm);
+      });
+
     return AppScaffold(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -35,13 +44,13 @@ class TodayScreen extends ConsumerWidget {
                       itemCount: 3,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        if (index >= goals.length) {
+                        if (index >= sortedGoals.length) {
                           return _EmptyGoalCard(
                             index: index,
                             onTap: () => _openCreate(context),
                           );
                         }
-                        final goal = goals[index];
+                        final goal = sortedGoals[index];
                         return _GoalCard(
                           goal: goal,
                           onTap: () => _openFocus(context),
@@ -202,15 +211,31 @@ class _GoalCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
-                style: AppTextStyles.body,
-              ),
+              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
+                  style: AppTextStyles.body,
+                ),
+                if (goal.scheduledMinutes != null)
+                  Text(
+                    _formatTime(goal.scheduledMinutes!),
+                    style: AppTextStyles.body,
+                  ),
+              ],
+            ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _formatTime(int minutes) {
+    final h = (minutes ~/ 60).toString().padLeft(2, '0');
+    final m = (minutes % 60).toString().padLeft(2, '0');
+    return '$h:$m';
   }
 
   String _categoryLabel(Goal goal) {

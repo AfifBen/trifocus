@@ -19,6 +19,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
   late final TextEditingController descriptionController;
   late final TextEditingController totalController;
   late String categoryType;
+  TimeOfDay? scheduledTime;
 
   @override
   void initState() {
@@ -28,6 +29,10 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     descriptionController = TextEditingController(text: widget.goal.description);
     totalController = TextEditingController(text: widget.goal.sessionsTotal.toString());
     categoryType = widget.goal.categoryType;
+    if (widget.goal.scheduledMinutes != null) {
+      final minutes = widget.goal.scheduledMinutes!;
+      scheduledTime = TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
+    }
   }
 
   @override
@@ -108,6 +113,35 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration('Cycles'),
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: scheduledTime ?? const TimeOfDay(hour: 9, minute: 0),
+                      );
+                      if (picked == null) return;
+                      setState(() => scheduledTime = picked);
+                    },
+                    child: Text(
+                      scheduledTime == null
+                          ? 'Set time'
+                          : 'Time: ${scheduledTime!.hour.toString().padLeft(2, '0')}:${scheduledTime!.minute.toString().padLeft(2, '0')}',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: scheduledTime == null
+                      ? null
+                      : () => setState(() => scheduledTime = null),
+                  child: const Text('Clear'),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -138,12 +172,18 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     final categoryRaw = categoryController.text.trim();
     final categoryItem = categoryRaw.isEmpty ? newTitle : categoryRaw;
 
+    final minutes = scheduledTime == null
+        ? null
+        : (scheduledTime!.hour * 60 + scheduledTime!.minute);
+
     final updated = widget.goal.copyWith(
       title: newTitle,
       categoryType: categoryType,
       categoryItem: categoryItem,
       description: descriptionController.text.trim(),
       sessionsTotal: total,
+      scheduledMinutes: minutes,
+      clearScheduledMinutes: scheduledTime == null,
     );
 
     await ref.read(todayGoalsProvider.notifier).updateGoal(updated);
