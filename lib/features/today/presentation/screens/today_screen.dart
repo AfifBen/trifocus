@@ -73,6 +73,8 @@ class TodayScreen extends ConsumerWidget {
                               goal: goal,
                               onTap: () => _openFocus(context),
                               onLongPress: () => _openDetail(context, goal),
+                              onTimeTap: () => _setTime(context, goal, ref),
+                              onTimeClear: () => _clearTime(goal, ref),
                             );
                           },
                         )
@@ -201,11 +203,15 @@ class _GoalCard extends StatelessWidget {
   final Goal goal;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final VoidCallback onTimeTap;
+  final VoidCallback onTimeClear;
 
   const _GoalCard({
     required this.goal,
     required this.onTap,
     required this.onLongPress,
+    required this.onTimeTap,
+    required this.onTimeClear,
   });
 
   @override
@@ -258,26 +264,26 @@ class _GoalCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
-                  style: AppTextStyles.body,
-                ),
-                InkWell(
-                  onTap: () => _setTime(context, goal, ref),
-                  onLongPress: goal.scheduledMinutes == null
-                      ? null
-                      : () => _clearTime(goal, ref),
-                  child: Text(
-                    goal.scheduledMinutes == null
-                        ? 'Set time'
-                        : _formatTime(goal.scheduledMinutes!),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${goal.sessionsDone}/${goal.sessionsTotal} sessions',
                     style: AppTextStyles.body,
                   ),
-                ),
-              ],
-            ),
+                  InkWell(
+                    onTap: onTimeTap,
+                    onLongPress: goal.scheduledMinutes == null
+                        ? null
+                        : onTimeClear,
+                    child: Text(
+                      goal.scheduledMinutes == null
+                          ? 'Set time'
+                          : _formatTime(goal.scheduledMinutes!),
+                      style: AppTextStyles.body,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
