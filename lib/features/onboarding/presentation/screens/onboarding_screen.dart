@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
+import '../../../goals/domain/models/goal.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../templates/domain/models/goal_template.dart';
 import '../../../templates/presentation/controllers/templates_controller.dart';
@@ -20,19 +21,19 @@ class OnboardingScreen extends ConsumerWidget {
         id: 'suggest_workday',
         name: 'Workday',
         createdAt: DateTime.now(),
-        goals: const [],
+        goals: const <Goal>[],
       ),
       GoalTemplate(
         id: 'suggest_learning',
         name: 'Learning',
         createdAt: DateTime.now(),
-        goals: const [],
+        goals: const <Goal>[],
       ),
       GoalTemplate(
         id: 'suggest_fitness',
         name: 'Fitness',
         createdAt: DateTime.now(),
-        goals: const [],
+        goals: const <Goal>[],
       ),
     ];
 
