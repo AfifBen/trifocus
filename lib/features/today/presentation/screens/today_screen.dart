@@ -8,6 +8,7 @@ import '../../../goals/domain/models/goal.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../goals/presentation/screens/create_goal_screen.dart';
 import '../../../goals/presentation/screens/goal_detail_screen.dart';
+import '../controllers/today_view_controller.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -16,14 +17,16 @@ class TodayScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goals = ref.watch(todayGoalsProvider);
 
+    final viewMode = ref.watch(todayViewProvider);
+
     final sortedGoals = [...goals]..sort((a, b) {
-        final am = a.scheduledMinutes;
-        final bm = b.scheduledMinutes;
-        if (am == null && bm == null) return 0;
-        if (am == null) return 1;
-        if (bm == null) return -1;
-        return am.compareTo(bm);
-      });
+      final am = a.scheduledMinutes;
+      final bm = b.scheduledMinutes;
+      if (am == null && bm == null) return 0;
+      if (am == null) return 1;
+      if (bm == null) return -1;
+      return am.compareTo(bm);
+    });
 
     return AppScaffold(
       child: Padding(
@@ -31,7 +34,21 @@ class TodayScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Today', style: AppTextStyles.headline),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Today', style: AppTextStyles.headline),
+                IconButton(
+                  onPressed: () => ref.read(todayViewProvider.notifier).toggle(),
+                  icon: Icon(
+                    viewMode == TodayViewMode.cards
+                        ? Icons.view_agenda
+                        : Icons.view_module,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             const Text('Three goals. One day.', style: AppTextStyles.body),
             const SizedBox(height: 24),
@@ -40,24 +57,29 @@ class TodayScreen extends ConsumerWidget {
                   ? _EmptyState(
                       onCreate: () => _openCreate(context),
                     )
-                  : ListView.separated(
-                      itemCount: 3,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        if (index >= sortedGoals.length) {
-                          return _EmptyGoalCard(
-                            index: index,
-                            onTap: () => _openCreate(context),
-                          );
-                        }
-                        final goal = sortedGoals[index];
-                        return _GoalCard(
-                          goal: goal,
-                          onTap: () => _openFocus(context),
-                          onLongPress: () => _openDetail(context, goal),
-                        );
-                      },
-                    ),
+                  : viewMode == TodayViewMode.cards
+                      ? ListView.separated(
+                          itemCount: 3,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            if (index >= sortedGoals.length) {
+                              return _EmptyGoalCard(
+                                index: index,
+                                onTap: () => _openCreate(context),
+                              );
+                            }
+                            final goal = sortedGoals[index];
+                            return _GoalCard(
+                              goal: goal,
+                              onTap: () => _openFocus(context),
+                              onLongPress: () => _openDetail(context, goal),
+                            );
+                          },
+                        )
+                      : _TimelineView(
+                          goals: sortedGoals,
+                          onGoalLongPress: (g) => _openDetail(context, g),
+                        ),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -300,6 +322,104 @@ class _EmptyGoalCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _TimelineView extends StatelessWidget {
+  final List<Goal> goals;
+  final ValueChanged<Goal> onGoalLongPress;
+
+  const _TimelineView({required this.goals, required this.onGoalLongPress});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = TimeOfDay.now();
+    final nowMin = now.hour * 60 + now.minute;
+
+    return ListView.separated(
+      itemCount: goals.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final g = goals[index];
+        final t = g.scheduledMinutes;
+        final timeLabel = t == null ? 'No time' : _formatTime(t);
+        final isPast = t != null && t <= nowMin;
+
+        return GestureDetector(
+          onLongPress: () => onGoalLongPress(g),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 72,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    timeLabel,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(g.title,
+                          style: AppTextStyles.title,
+                          overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${g.sessionsDone}/${g.sessionsTotal} sessions',
+                        style: AppTextStyles.body,
+                      ),
+                    ],
+                  ),
+                ),
+                if (isPast)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Now',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatTime(int minutes) {
+    final h = (minutes ~/ 60).toString().padLeft(2, '0');
+    final m = (minutes % 60).toString().padLeft(2, '0');
+    return '$h:$m';
   }
 }
 
