@@ -27,6 +27,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authStateProvider, (prev, next) {
+      next.whenData((user) {
+        if (user != null && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+    });
+
     return AppScaffold(
       appBar: AppBar(
         title: const Text('Sign in'),
@@ -92,6 +100,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ? 'Already have an account? Sign in'
                   : 'No account? Create one'),
             ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: _busy ? null : _forgotPassword,
+                child: const Text('Forgot password?'),
+              ),
+            ),
           ],
         ),
       ),
@@ -127,6 +142,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Auth failed: $e')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email first.')),
+      );
+      return;
+    }
+
+    setState(() => _busy = true);
+    try {
+      await ref.read(authControllerProvider).sendPasswordReset(email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reset failed: $e')),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
