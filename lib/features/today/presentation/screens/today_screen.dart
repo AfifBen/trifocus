@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../goals/domain/models/goal.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../goals/presentation/screens/create_goal_screen.dart';

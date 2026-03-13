@@ -16,7 +16,7 @@ import '../../../templates/presentation/controllers/templates_controller.dart';
 import '../../../templates/domain/models/goal_template.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../sync/cloud_sync_controller.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../controllers/backup_controller.dart';
 import '../controllers/locale_controller.dart';
 
