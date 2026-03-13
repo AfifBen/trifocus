@@ -7,12 +7,14 @@ import '../core/data/local_storage.dart';
 class CloudSyncState {
   final bool syncing;
   final bool pending;
+  final bool conflict;
   final DateTime? lastSyncedAt;
   final String? lastError;
 
   const CloudSyncState({
     required this.syncing,
     required this.pending,
+    required this.conflict,
     required this.lastSyncedAt,
     required this.lastError,
   });
@@ -20,12 +22,14 @@ class CloudSyncState {
   CloudSyncState copyWith({
     bool? syncing,
     bool? pending,
+    bool? conflict,
     DateTime? lastSyncedAt,
     String? lastError,
   }) {
     return CloudSyncState(
       syncing: syncing ?? this.syncing,
       pending: pending ?? this.pending,
+      conflict: conflict ?? this.conflict,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       lastError: lastError,
     );
@@ -46,6 +50,7 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
       : super(const CloudSyncState(
           syncing: false,
           pending: false,
+          conflict: false,
           lastSyncedAt: null,
           lastError: null,
         )) {
@@ -67,9 +72,17 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
         .doc('backup');
   }
 
+  Map<String, dynamic>? _remoteBackupCache;
+  DateTime? _remoteUpdatedAtCache;
+
   Future<void> pullThenMaybePush(User user) async {
     final pending = await LocalStorage.loadCloudPending();
-    state = state.copyWith(syncing: true, pending: pending, lastError: null);
+    state = state.copyWith(
+      syncing: true,
+      pending: pending,
+      conflict: false,
+      lastError: null,
+    );
     try {
       final snap = await _doc(user).get();
       if (!snap.exists) {
@@ -79,7 +92,8 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
         return;
       }
 
-      final remoteUpdatedAt = (snap.data()?['updatedAt'] as Timestamp?)?.toDate();
+      final remoteUpdatedAt =
+          (snap.data()?['updatedAt'] as Timestamp?)?.toDate();
       final remoteData = snap.data()?['data'] as Map<String, dynamic>?;
 
       if (remoteData == null) {
@@ -88,13 +102,24 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
         return;
       }
 
+      _remoteBackupCache = remoteData;
+      _remoteUpdatedAtCache = remoteUpdatedAt;
+
       final localIso = await LocalStorage.loadCloudUpdatedAt();
       final localUpdated = localIso == null ? null : DateTime.tryParse(localIso);
 
-      if (remoteUpdatedAt != null &&
-          (localUpdated == null || remoteUpdatedAt.isAfter(localUpdated))) {
+      final remoteIsNewer = remoteUpdatedAt != null &&
+          (localUpdated == null || remoteUpdatedAt.isAfter(localUpdated));
+
+      // Conflict: local has pending changes but remote is newer.
+      if (pending && remoteIsNewer) {
+        state = state.copyWith(syncing: false, conflict: true);
+        return;
+      }
+
+      if (remoteIsNewer) {
         await LocalStorage.importAll(remoteData);
-        await LocalStorage.saveCloudUpdatedAt(remoteUpdatedAt.toIso8601String());
+        await LocalStorage.saveCloudUpdatedAt(remoteUpdatedAt!.toIso8601String());
         await LocalStorage.saveCloudPending(false);
         state = state.copyWith(
           pending: false,
@@ -111,6 +136,32 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
         lastError: e.toString(),
       );
     }
+  }
+
+  Future<void> useCloudVersion() async {
+    final user = _ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return;
+    final data = _remoteBackupCache;
+    final updatedAt = _remoteUpdatedAtCache;
+    if (data == null || updatedAt == null) return;
+
+    state = state.copyWith(syncing: true, lastError: null);
+    await LocalStorage.importAll(data);
+    await LocalStorage.saveCloudUpdatedAt(updatedAt.toIso8601String());
+    await LocalStorage.saveCloudPending(false);
+    state = state.copyWith(
+      syncing: false,
+      pending: false,
+      conflict: false,
+      lastSyncedAt: DateTime.now(),
+    );
+  }
+
+  Future<void> keepLocalVersion() async {
+    final user = _ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return;
+    await pushFromLocal(user);
+    state = state.copyWith(conflict: false);
   }
 
   Future<void> pushFromLocal(User user) async {

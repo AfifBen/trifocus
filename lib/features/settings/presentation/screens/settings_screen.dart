@@ -95,14 +95,38 @@ class SettingsScreen extends ConsumerWidget {
                             final sync = ref.watch(cloudSyncProvider);
                             final status = sync.syncing
                                 ? 'Syncing…'
-                                : (sync.pending
-                                    ? 'Pending changes'
-                                    : (sync.lastSyncedAt == null
-                                        ? 'Not synced yet'
-                                        : 'Last synced: ${sync.lastSyncedAt!.hour.toString().padLeft(2, '0')}:${sync.lastSyncedAt!.minute.toString().padLeft(2, '0')}'));
+                                : (sync.conflict
+                                    ? 'Conflict detected'
+                                    : (sync.pending
+                                        ? 'Pending changes'
+                                        : (sync.lastSyncedAt == null
+                                            ? 'Not synced yet'
+                                            : 'Last synced: ${sync.lastSyncedAt!.hour.toString().padLeft(2, '0')}:${sync.lastSyncedAt!.minute.toString().padLeft(2, '0')}')));
                             return Text(status, style: AppTextStyles.body);
                           },
                         ),
+                        if (ref.watch(cloudSyncProvider).conflict)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => ref
+                                      .read(cloudSyncProvider.notifier)
+                                      .useCloudVersion(),
+                                  child: const Text('Use cloud'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => ref
+                                      .read(cloudSyncProvider.notifier)
+                                      .keepLocalVersion(),
+                                  child: const Text('Keep local'),
+                                ),
+                              ),
+                            ],
+                          ),
                         if (ref.watch(cloudSyncProvider).lastError != null)
                           Text(
                             'Sync error: ${ref.watch(cloudSyncProvider).lastError}',
