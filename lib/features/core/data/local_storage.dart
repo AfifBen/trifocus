@@ -25,6 +25,7 @@ class LocalStorage {
   static const _hideDoneGoalsKey = 'trifocus_hide_done_goals';
   static const _cloudUpdatedAtKey = 'trifocus_cloud_updated_at';
   static const _cloudPendingKey = 'trifocus_cloud_pending';
+  static const _localeKey = 'trifocus_locale';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -86,6 +87,20 @@ class LocalStorage {
   static Future<void> saveCloudPending(bool pending) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_cloudPendingKey, pending);
+  }
+
+  static Future<String?> loadLocaleCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_localeKey);
+  }
+
+  static Future<void> saveLocaleCode(String? code) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (code == null) {
+      await prefs.remove(_localeKey);
+    } else {
+      await prefs.setString(_localeKey, code);
+    }
   }
 
   static Future<void> saveGoals(List<Goal> goals) async {
@@ -270,6 +285,7 @@ class LocalStorage {
     await prefs.remove(_hideDoneGoalsKey);
     await prefs.remove(_cloudUpdatedAtKey);
     await prefs.remove(_cloudPendingKey);
+    await prefs.remove(_localeKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -297,6 +313,7 @@ class LocalStorage {
       'hideDoneGoals': prefs.getBool(_hideDoneGoalsKey),
       'cloudUpdatedAt': prefs.getString(_cloudUpdatedAtKey),
       'cloudPending': prefs.getBool(_cloudPendingKey),
+      'locale': prefs.getString(_localeKey),
     };
   }
 
@@ -349,5 +366,6 @@ class LocalStorage {
     await setBool(_hideDoneGoalsKey, data['hideDoneGoals']);
     await setString(_cloudUpdatedAtKey, data['cloudUpdatedAt']);
     await setBool(_cloudPendingKey, data['cloudPending']);
+    await setString(_localeKey, data['locale']);
   }
 }

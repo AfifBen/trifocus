@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text('Sign in'),
+        title: Text(AppLocalizations.of(context)!.signInTitle),
         backgroundColor: AppColors.background,
       ),
       child: SingleChildScrollView(
@@ -50,7 +51,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Account', style: AppTextStyles.headline),
+            Text(
+              AppLocalizations.of(context)!.accountTitle,
+              style: AppTextStyles.headline,
+            ),
             const SizedBox(height: 8),
             const Text('Sync your data across devices.', style: AppTextStyles.body),
             const SizedBox(height: 24),
@@ -66,29 +70,40 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Continue with Google'),
+                child: Text(AppLocalizations.of(context)!.continueWithGoogle),
               ),
             ),
             const SizedBox(height: 18),
-            const Text('Or use email', style: AppTextStyles.title),
+            Text(
+              AppLocalizations.of(context)!.orUseEmail,
+              style: AppTextStyles.title,
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(hintText: 'Email'),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.emailHint,
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _password,
               obscureText: true,
-              decoration: const InputDecoration(hintText: 'Password'),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.passwordHint,
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _busy ? null : _emailAuth,
-                child: Text(_isSignUp ? 'Create account' : 'Sign in'),
+                child: Text(
+                  _isSignUp
+                      ? AppLocalizations.of(context)!.createAccount
+                      : AppLocalizations.of(context)!.signIn,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -104,7 +119,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed: _busy ? null : _forgotPassword,
-                child: const Text('Forgot password?'),
+                child: Text(AppLocalizations.of(context)!.forgotPassword),
               ),
             ),
           ],

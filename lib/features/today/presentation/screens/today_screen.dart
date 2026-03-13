@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../goals/domain/models/goal.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
 import '../../../goals/presentation/screens/create_goal_screen.dart';
@@ -52,7 +53,10 @@ class TodayScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Today', style: AppTextStyles.headline),
+                Text(
+                  AppLocalizations.of(context)!.todayTitle,
+                  style: AppTextStyles.headline,
+                ),
                 Row(
                   children: [
                     IconButton(
@@ -79,14 +83,17 @@ class TodayScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const Text('Three goals. One day.', style: AppTextStyles.body),
+            Text(
+              AppLocalizations.of(context)!.todaySubtitle,
+              style: AppTextStyles.body,
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => _applyTemplate(context, ref),
                 icon: const Icon(Icons.auto_awesome),
-                label: const Text('Apply template'),
+                label: Text(AppLocalizations.of(context)!.applyTemplate),
               ),
             ),
             const SizedBox(height: 16),

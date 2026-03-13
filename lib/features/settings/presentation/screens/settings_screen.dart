@@ -16,7 +16,9 @@ import '../../../templates/presentation/controllers/templates_controller.dart';
 import '../../../templates/domain/models/goal_template.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../sync/cloud_sync_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../controllers/backup_controller.dart';
+import '../controllers/locale_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -29,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context)!.settingsTitle),
         backgroundColor: AppColors.background,
       ),
       child: SingleChildScrollView(
@@ -42,7 +44,30 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Account', style: AppTextStyles.title),
+            Text(
+              AppLocalizations.of(context)!.accountTitle,
+              style: AppTextStyles.title,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: ref.watch(localeProvider)?.languageCode ?? 'system',
+              isExpanded: true,
+              dropdownColor: AppColors.surface,
+              decoration: _decoration('Language'),
+              items: const [
+                DropdownMenuItem(value: 'system', child: Text('System')),
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'fr', child: Text('Français')),
+                DropdownMenuItem(value: 'ar', child: Text('العربية')),
+              ],
+              onChanged: (v) {
+                final code = v ?? 'system';
+                ref.read(localeProvider.notifier).setLocale(
+                      code == 'system' ? null : Locale(code),
+                    );
+              },
+            ),
+            const SizedBox(height: 16),
             const SizedBox(height: 12),
             ref.watch(authStateProvider).when(
                   data: (user) {
