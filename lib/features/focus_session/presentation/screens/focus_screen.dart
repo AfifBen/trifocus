@@ -208,11 +208,7 @@ class FocusScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Semantics(
-                      button: true,
-                      label: 'Pause focus timer',
-                      child: Text('Pause'),
-                    ),
+                    child: const Text('Pause'),
                   ),
                 ),
                 const SizedBox(width: 12),
