@@ -15,6 +15,7 @@ import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../templates/presentation/controllers/templates_controller.dart';
 import '../../../templates/domain/models/goal_template.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../sync/cloud_sync_controller.dart';
 import '../controllers/backup_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -46,12 +47,24 @@ class SettingsScreen extends ConsumerWidget {
             ref.watch(authStateProvider).when(
                   data: (user) {
                     final signedIn = user != null;
-                    return SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () => context.push(signedIn ? '/account' : '/auth'),
-                        child: Text(signedIn ? 'Account' : 'Sign in to sync'),
-                      ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () =>
+                              context.push(signedIn ? '/account' : '/auth'),
+                          child: Text(signedIn ? 'Account' : 'Sign in to sync'),
+                        ),
+                        const SizedBox(height: 10),
+                        OutlinedButton(
+                          onPressed: !signedIn
+                              ? null
+                              : () => ref
+                                  .read(cloudSyncProvider.notifier)
+                                  .pushIfSignedIn(),
+                          child: const Text('Sync now'),
+                        ),
+                      ],
                     );
                   },
                   loading: () => const LinearProgressIndicator(),
