@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/data/local_storage.dart';
+import '../../../sync/cloud_sync_controller.dart';
 
 class FocusSettingsState {
   final int focusSeconds;
@@ -23,11 +24,12 @@ class FocusSettingsState {
 
 final focusSettingsProvider =
     StateNotifierProvider<FocusSettingsController, FocusSettingsState>(
-  (ref) => FocusSettingsController()..load(),
+  (ref) => FocusSettingsController(ref)..load(),
 );
 
 class FocusSettingsController extends StateNotifier<FocusSettingsState> {
-  FocusSettingsController()
+  final Ref _ref;
+  FocusSettingsController(this._ref)
       : super(const FocusSettingsState(focusSeconds: 1500, breakSeconds: 300));
 
   Future<void> load() async {
@@ -42,10 +44,12 @@ class FocusSettingsController extends StateNotifier<FocusSettingsState> {
   Future<void> setFocusSeconds(int seconds) async {
     state = state.copyWith(focusSeconds: seconds);
     await LocalStorage.saveFocusDurationSeconds(seconds);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setBreakSeconds(int seconds) async {
     state = state.copyWith(breakSeconds: seconds);
     await LocalStorage.saveBreakDurationSeconds(seconds);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 }

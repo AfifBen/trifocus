@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/data/local_storage.dart';
+import '../../../sync/cloud_sync_controller.dart';
 
 final hideDoneProvider = StateNotifierProvider<HideDoneController, bool>(
-  (ref) => HideDoneController()..load(),
+  (ref) => HideDoneController(ref)..load(),
 );
 
 class HideDoneController extends StateNotifier<bool> {
-  HideDoneController() : super(false);
+  final Ref _ref;
+  HideDoneController(this._ref) : super(false);
 
   Future<void> load() async {
     state = await LocalStorage.loadHideDoneGoals();
@@ -15,5 +17,6 @@ class HideDoneController extends StateNotifier<bool> {
   Future<void> toggle() async {
     state = !state;
     await LocalStorage.saveHideDoneGoals(state);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 }

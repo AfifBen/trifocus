@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/data/local_storage.dart';
+import '../../../sync/cloud_sync_controller.dart';
 import '../../domain/models/goal_template.dart';
 
 final templatesProvider =
     StateNotifierProvider<TemplatesController, List<GoalTemplate>>(
-  (ref) => TemplatesController()..load(),
+  (ref) => TemplatesController(ref)..load(),
 );
 
 class TemplatesController extends StateNotifier<List<GoalTemplate>> {
-  TemplatesController() : super(const []);
+  final Ref _ref;
+  TemplatesController(this._ref) : super(const []);
 
   Future<void> load() async {
     final items = await LocalStorage.loadTemplates();
@@ -20,12 +22,14 @@ class TemplatesController extends StateNotifier<List<GoalTemplate>> {
     final next = [template, ...state];
     state = next;
     await LocalStorage.saveTemplates(next);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> remove(String id) async {
     final next = state.where((t) => t.id != id).toList();
     state = next;
     await LocalStorage.saveTemplates(next);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> rename(String id, String name) async {
@@ -43,6 +47,7 @@ class TemplatesController extends StateNotifier<List<GoalTemplate>> {
         .toList();
     state = next;
     await LocalStorage.saveTemplates(next);
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> duplicate(String id) async {

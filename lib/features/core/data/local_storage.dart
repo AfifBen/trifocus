@@ -23,6 +23,7 @@ class LocalStorage {
   static const _nextGoalReminderLeadMinKey = 'trifocus_next_goal_lead_min';
   static const _templatesKey = 'trifocus_goal_templates';
   static const _hideDoneGoalsKey = 'trifocus_hide_done_goals';
+  static const _cloudUpdatedAtKey = 'trifocus_cloud_updated_at';
   static const _reminderHourKey = 'trifocus_reminder_hour';
   static const _reminderMinuteKey = 'trifocus_reminder_minute';
 
@@ -64,6 +65,16 @@ class LocalStorage {
   static Future<void> saveHideDoneGoals(bool hide) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_hideDoneGoalsKey, hide);
+  }
+
+  static Future<String?> loadCloudUpdatedAt() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_cloudUpdatedAtKey);
+  }
+
+  static Future<void> saveCloudUpdatedAt(String iso) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cloudUpdatedAtKey, iso);
   }
 
   static Future<void> saveGoals(List<Goal> goals) async {
@@ -246,6 +257,7 @@ class LocalStorage {
     await prefs.remove(_nextGoalReminderLeadMinKey);
     await prefs.remove(_templatesKey);
     await prefs.remove(_hideDoneGoalsKey);
+    await prefs.remove(_cloudUpdatedAtKey);
   }
 
   static Future<Map<String, dynamic>> exportAll() async {
@@ -271,6 +283,7 @@ class LocalStorage {
       'nextGoalReminderLeadMin': prefs.getInt(_nextGoalReminderLeadMinKey),
       'templates': prefs.getString(_templatesKey),
       'hideDoneGoals': prefs.getBool(_hideDoneGoalsKey),
+      'cloudUpdatedAt': prefs.getString(_cloudUpdatedAtKey),
     };
   }
 
@@ -321,5 +334,6 @@ class LocalStorage {
     await setInt(_nextGoalReminderLeadMinKey, data['nextGoalReminderLeadMin']);
     await setString(_templatesKey, data['templates']);
     await setBool(_hideDoneGoalsKey, data['hideDoneGoals']);
+    await setString(_cloudUpdatedAtKey, data['cloudUpdatedAt']);
   }
 }

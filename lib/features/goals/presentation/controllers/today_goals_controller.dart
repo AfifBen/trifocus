@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/goal.dart';
 import '../../../core/data/local_storage.dart';
 import '../../../notifications/reminder_controller.dart';
+import '../../../sync/cloud_sync_controller.dart';
 
 final todayGoalsProvider = StateNotifierProvider<TodayGoalsController, List<Goal>>(
   (ref) => TodayGoalsController(ref)..load(),
@@ -30,12 +31,14 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
 
     await LocalStorage.saveGoalsDay(today);
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> updateGoal(Goal updated) async {
     state = state.map((g) => g.id == updated.id ? updated : g).toList();
     await LocalStorage.saveGoals(state);
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setGoals(List<Goal> goals) async {
@@ -43,6 +46,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     await LocalStorage.saveGoals(state);
     await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> resetTodayProgress() async {
@@ -51,6 +55,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     await LocalStorage.saveGoals(reset);
     await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   String _dayKey(DateTime dt) {

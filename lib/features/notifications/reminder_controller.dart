@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/data/local_storage.dart';
+import '../sync/cloud_sync_controller.dart';
 import 'notification_service.dart';
 
 class ReminderState {
@@ -36,11 +37,12 @@ class ReminderState {
 
 final reminderProvider =
     StateNotifierProvider<ReminderController, ReminderState>(
-  (ref) => ReminderController()..load(),
+  (ref) => ReminderController(ref)..load(),
 );
 
 class ReminderController extends StateNotifier<ReminderState> {
-  ReminderController()
+  final Ref _ref;
+  ReminderController(this._ref)
       : super(const ReminderState(
           enabled: false,
           hour: 9,
@@ -71,24 +73,28 @@ class ReminderController extends StateNotifier<ReminderState> {
     state = state.copyWith(enabled: enabled);
     await LocalStorage.saveReminderEnabled(enabled);
     await syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setTime({required int hour, required int minute}) async {
     state = state.copyWith(hour: hour, minute: minute);
     await LocalStorage.saveReminderTime(hour: hour, minute: minute);
     await syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setNextGoalEnabled(bool enabled) async {
     state = state.copyWith(nextGoalEnabled: enabled);
     await LocalStorage.saveNextGoalReminderEnabled(enabled);
     await syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setNextGoalLeadMinutes(int minutes) async {
     state = state.copyWith(nextGoalLeadMinutes: minutes);
     await LocalStorage.saveNextGoalReminderLeadMinutes(minutes);
     await syncWithGoals();
+    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> syncWithGoals() async {
