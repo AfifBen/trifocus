@@ -60,22 +60,40 @@ class TodayScreen extends ConsumerWidget {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () =>
-                          ref.read(hideDoneProvider.notifier).toggle(),
+                      onPressed:
+                          () => ref.read(hideDoneProvider.notifier).toggle(),
                       icon: Icon(
                         hideDone ? Icons.visibility_off : Icons.visibility,
                         color: AppColors.textPrimary,
                       ),
                       tooltip: hideDone ? 'Show done' : 'Hide done',
                     ),
-                    IconButton(
-                      onPressed: () =>
-                          ref.read(todayViewProvider.notifier).toggle(),
-                      icon: Icon(
-                        viewMode == TodayViewMode.cards
-                            ? Icons.view_agenda
-                            : Icons.view_module,
-                        color: AppColors.textPrimary,
+                    Semantics(
+                      label: 'Toggle view mode',
+                      button: true,
+                      child: IconButton(
+                        onPressed:
+                            () => ref.read(todayViewProvider.notifier).toggle(),
+                        icon: Icon(
+                          viewMode == TodayViewMode.cards
+                              ? Icons.view_agenda
+                              : Icons.view_module,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Toggle view mode',
+                      button: true,
+                      child: IconButton(
+                        onPressed: () =>
+                            ref.read(todayViewProvider.notifier).toggle(),
+                        icon: Icon(
+                          viewMode == TodayViewMode.cards
+                              ? Icons.view_agenda
+                              : Icons.view_module,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
