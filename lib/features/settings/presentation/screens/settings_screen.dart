@@ -64,6 +64,25 @@ class SettingsScreen extends ConsumerWidget {
                                   .pushIfSignedIn(),
                           child: const Text('Sync now'),
                         ),
+                        const SizedBox(height: 8),
+                        Builder(
+                          builder: (context) {
+                            final sync = ref.watch(cloudSyncProvider);
+                            final status = sync.syncing
+                                ? 'Syncing…'
+                                : (sync.pending
+                                    ? 'Pending changes'
+                                    : (sync.lastSyncedAt == null
+                                        ? 'Not synced yet'
+                                        : 'Last synced: ${sync.lastSyncedAt!.hour.toString().padLeft(2, '0')}:${sync.lastSyncedAt!.minute.toString().padLeft(2, '0')}'));
+                            return Text(status, style: AppTextStyles.body);
+                          },
+                        ),
+                        if (ref.watch(cloudSyncProvider).lastError != null)
+                          Text(
+                            'Sync error: ${ref.watch(cloudSyncProvider).lastError}',
+                            style: AppTextStyles.body,
+                          ),
                       ],
                     );
                   },

@@ -6,13 +6,27 @@ import '../core/data/local_storage.dart';
 
 class CloudSyncState {
   final bool syncing;
+  final bool pending;
+  final DateTime? lastSyncedAt;
   final String? lastError;
 
-  const CloudSyncState({required this.syncing, required this.lastError});
+  const CloudSyncState({
+    required this.syncing,
+    required this.pending,
+    required this.lastSyncedAt,
+    required this.lastError,
+  });
 
-  CloudSyncState copyWith({bool? syncing, String? lastError}) {
+  CloudSyncState copyWith({
+    bool? syncing,
+    bool? pending,
+    DateTime? lastSyncedAt,
+    String? lastError,
+  }) {
     return CloudSyncState(
       syncing: syncing ?? this.syncing,
+      pending: pending ?? this.pending,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       lastError: lastError,
     );
   }
@@ -29,7 +43,12 @@ final cloudSyncProvider = StateNotifierProvider<CloudSyncController, CloudSyncSt
 class CloudSyncController extends StateNotifier<CloudSyncState> {
   final Ref _ref;
   CloudSyncController(this._ref)
-      : super(const CloudSyncState(syncing: false, lastError: null)) {
+      : super(const CloudSyncState(
+          syncing: false,
+          pending: false,
+          lastSyncedAt: null,
+          lastError: null,
+        )) {
     _ref.listen(authStateProvider, (prev, next) {
       next.whenData((user) {
         if (user != null) {
@@ -49,7 +68,8 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
   }
 
   Future<void> pullThenMaybePush(User user) async {
-    state = state.copyWith(syncing: true, lastError: null);
+    final pending = await LocalStorage.loadCloudPending();
+    state = state.copyWith(syncing: true, pending: pending, lastError: null);
     try {
       final snap = await _doc(user).get();
       if (!snap.exists) {
@@ -71,14 +91,25 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
       final localIso = await LocalStorage.loadCloudUpdatedAt();
       final localUpdated = localIso == null ? null : DateTime.tryParse(localIso);
 
-      if (remoteUpdatedAt != null && (localUpdated == null || remoteUpdatedAt.isAfter(localUpdated))) {
+      if (remoteUpdatedAt != null &&
+          (localUpdated == null || remoteUpdatedAt.isAfter(localUpdated))) {
         await LocalStorage.importAll(remoteData);
         await LocalStorage.saveCloudUpdatedAt(remoteUpdatedAt.toIso8601String());
+        await LocalStorage.saveCloudPending(false);
+        state = state.copyWith(
+          pending: false,
+          lastSyncedAt: DateTime.now(),
+        );
       }
 
       state = state.copyWith(syncing: false);
     } catch (e) {
-      state = state.copyWith(syncing: false, lastError: e.toString());
+      await LocalStorage.saveCloudPending(true);
+      state = state.copyWith(
+        syncing: false,
+        pending: true,
+        lastError: e.toString(),
+      );
     }
   }
 
@@ -91,11 +122,31 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
         'data': data,
       }, SetOptions(merge: true));
 
-      // Store a local timestamp to compare with remote on next login.
-      await LocalStorage.saveCloudUpdatedAt(DateTime.now().toIso8601String());
-      state = state.copyWith(syncing: false);
+      // Read back server timestamp for accurate compare.
+      final snap = await _doc(user).get();
+      final remoteUpdatedAt =
+          (snap.data()?['updatedAt'] as Timestamp?)?.toDate();
+
+      if (remoteUpdatedAt != null) {
+        await LocalStorage.saveCloudUpdatedAt(remoteUpdatedAt.toIso8601String());
+      } else {
+        await LocalStorage.saveCloudUpdatedAt(DateTime.now().toIso8601String());
+      }
+
+      await LocalStorage.saveCloudPending(false);
+
+      state = state.copyWith(
+        syncing: false,
+        pending: false,
+        lastSyncedAt: DateTime.now(),
+      );
     } catch (e) {
-      state = state.copyWith(syncing: false, lastError: e.toString());
+      await LocalStorage.saveCloudPending(true);
+      state = state.copyWith(
+        syncing: false,
+        pending: true,
+        lastError: e.toString(),
+      );
     }
   }
 
