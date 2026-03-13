@@ -249,6 +249,16 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 28),
+            const Text('Pro', style: AppTextStyles.title),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => context.push('/pro'),
+                child: const Text('TriFocus Pro'),
+              ),
+            ),
+            const SizedBox(height: 28),
             const Text('Templates', style: AppTextStyles.title),
             const SizedBox(height: 12),
             SizedBox(
