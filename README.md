@@ -80,9 +80,9 @@ flutter run
 
 ## Roadmap (short)
 
-- Better analytics from history
-- UI polish + theming improvements
-- Cloud sync / auth (optional)
+- Widgets (Android)
+- Push notifications (FCM)
+- More analytics and UX polish
 
 ## GitHub Pages
 
