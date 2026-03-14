@@ -252,7 +252,6 @@ class TodayScreen extends ConsumerWidget {
   }
 
   void _openFocus(BuildContext context) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
     if (context.mounted) {
       context.go('/focus');
     }

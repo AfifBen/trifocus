@@ -62,7 +62,7 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
 
     await ref.read(historyProvider.notifier).add(
           FocusLog(
-            id: 'log_${DateTime.now().millisecondsSinceEpoch}',
+            id: 'log_${DateTime.now().microsecondsSinceEpoch}',
             goalId: goalId,
             goalTitle: title,
             durationSeconds: duration,
