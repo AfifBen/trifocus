@@ -82,20 +82,6 @@ class TodayScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    Semantics(
-                      label: 'Toggle view mode',
-                      button: true,
-                      child: IconButton(
-                        onPressed: () =>
-                            ref.read(todayViewProvider.notifier).toggle(),
-                        icon: Icon(
-                          viewMode == TodayViewMode.cards
-                              ? Icons.view_agenda
-                              : Icons.view_module,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ],
