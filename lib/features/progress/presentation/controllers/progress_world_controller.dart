@@ -76,7 +76,8 @@ final progressWorldProvider = Provider<ProgressWorldState>((ref) {
 
   int stageIndex = 0;
   for (var i = 0; i < stages.length; i++) {
-    if (totalXp >= stages[i]['xp'] as int) stageIndex = i;
+    final threshold = stages[i]['xp'] as int;
+    if (totalXp >= threshold) stageIndex = i;
   }
 
   final currentXp = stages[stageIndex]['xp'] as int;
