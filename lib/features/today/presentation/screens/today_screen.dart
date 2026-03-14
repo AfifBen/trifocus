@@ -45,11 +45,13 @@ class TodayScreen extends ConsumerWidget {
     });
 
     return AppScaffold(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -153,7 +155,8 @@ class TodayScreen extends ConsumerWidget {
                 child: Text(goals.length < 3 ? 'Create Goals' : 'Start Focus'),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
