@@ -11,6 +11,7 @@ import '../../../history/presentation/controllers/history_controller.dart';
 import '../controllers/active_goal_controller.dart';
 import '../controllers/focus_timer_controller.dart';
 import '../controllers/session_result_controller.dart';
+import '../controllers/session_duration_controller.dart';
 
 class SessionCompleteScreen extends ConsumerStatefulWidget {
   const SessionCompleteScreen({super.key});
@@ -53,9 +54,10 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
     }
 
     final focusTimer = ref.read(focusTimerProvider);
-    final duration = focusTimer.totalSeconds;
-
     final result = ref.read(sessionResultProvider);
+
+    final lastDuration = ref.read(lastSessionDurationProvider);
+    final duration = lastDuration ?? focusTimer.totalSeconds;
 
     await ref.read(historyProvider.notifier).add(
           FocusLog(
@@ -69,6 +71,8 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
                 : FocusLogStatus.completed,
           ),
         );
+
+    ref.read(lastSessionDurationProvider.notifier).clear();
   }
 
   Future<void> _incrementActiveGoal() async {

@@ -10,6 +10,7 @@ import '../controllers/active_goal_controller.dart';
 import '../controllers/focus_settings_controller.dart';
 import '../controllers/focus_timer_controller.dart';
 import '../controllers/session_result_controller.dart';
+import '../controllers/session_duration_controller.dart';
 
 class FocusScreen extends ConsumerWidget {
   const FocusScreen({super.key});
@@ -44,6 +45,9 @@ class FocusScreen extends ConsumerWidget {
         if (context.mounted) {
           notifier.pause();
           ref.read(sessionResultProvider.notifier).setCompleted();
+          ref
+              .read(lastSessionDurationProvider.notifier)
+              .set(timer.totalSeconds);
           context.go('/break');
         }
       });
@@ -252,6 +256,11 @@ class FocusScreen extends ConsumerWidget {
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   ref.read(sessionResultProvider.notifier).setEndedEarly();
+                  final elapsed = (timer.totalSeconds - timer.remainingSeconds)
+                      .clamp(0, timer.totalSeconds);
+                  ref
+                      .read(lastSessionDurationProvider.notifier)
+                      .set(elapsed);
                   notifier.reset();
                   context.go('/session-complete');
                 },
