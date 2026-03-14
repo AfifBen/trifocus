@@ -28,10 +28,11 @@ final analyticsProvider = Provider<AnalyticsState>((ref) {
 
   for (final l in completed) {
     final key = dayKey(l.createdAt);
-    byDay[key] = (byDay[key] ?? 0) + (l.durationSeconds ~/ 60);
+    final mins = l.durationSeconds == 0 ? 0 : (l.durationSeconds / 60).ceil();
+    byDay[key] = (byDay[key] ?? 0) + mins;
 
     final goal = (l.goalTitle ?? 'Focus session').trim();
-    byGoal[goal] = (byGoal[goal] ?? 0) + (l.durationSeconds ~/ 60);
+    byGoal[goal] = (byGoal[goal] ?? 0) + mins;
   }
 
   final top = byGoal.entries.toList()

@@ -33,9 +33,11 @@ final progressWorldProvider = Provider<ProgressWorldState>((ref) {
   // less automatically because durationSeconds is the elapsed time).
   final counted = logs;
 
+  int _mins(int seconds) => seconds == 0 ? 0 : (seconds / 60).ceil();
+
   final minutes = counted.fold<int>(
     0,
-    (acc, l) => acc + (l.durationSeconds ~/ 60),
+    (acc, l) => acc + _mins(l.durationSeconds),
   );
 
   final sessions = counted.length;

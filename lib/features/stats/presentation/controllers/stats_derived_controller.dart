@@ -20,16 +20,18 @@ final derivedStatsProvider = Provider<DerivedStats>((ref) {
   bool sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
+  int _mins(int seconds) => seconds == 0 ? 0 : (seconds / 60).ceil();
+
   final todayMinutes = logs
       .where((l) => sameDay(l.createdAt, now))
-      .fold<int>(0, (acc, l) => acc + (l.durationSeconds ~/ 60));
+      .fold<int>(0, (acc, l) => acc + _mins(l.durationSeconds));
 
   final weekStart = now.subtract(Duration(days: now.weekday - 1));
   final weekStartDay = DateTime(weekStart.year, weekStart.month, weekStart.day);
 
   final weekMinutes = logs
       .where((l) => !l.createdAt.isBefore(weekStartDay))
-      .fold<int>(0, (acc, l) => acc + (l.durationSeconds ~/ 60));
+      .fold<int>(0, (acc, l) => acc + _mins(l.durationSeconds));
 
   return DerivedStats(
     totalSessions: logs.length,

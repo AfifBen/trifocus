@@ -65,7 +65,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final log = items[index];
-                        final mins = (log.durationSeconds / 60).round();
+                        final mins = log.durationSeconds == 0
+                            ? 0
+                            : (log.durationSeconds / 60).ceil();
                         final statusLabel = log.status == FocusLogStatus.endedEarly
                             ? 'Ended'
                             : 'Completed';
