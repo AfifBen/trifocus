@@ -22,8 +22,13 @@ class FocusScreen extends ConsumerWidget {
     final activeGoalId = ref.watch(activeGoalProvider);
     final settings = ref.watch(focusSettingsProvider);
 
-    final effectiveActiveGoalId = activeGoalId ?? (goals.isNotEmpty ? goals.first.id : null);
-    if (effectiveActiveGoalId != activeGoalId && goals.isNotEmpty) {
+    final availableGoals = goals
+        .where((g) => g.sessionsTotal <= 0 || g.sessionsDone < g.sessionsTotal)
+        .toList();
+
+    final effectiveActiveGoalId = activeGoalId ??
+        (availableGoals.isNotEmpty ? availableGoals.first.id : null);
+    if (effectiveActiveGoalId != activeGoalId && availableGoals.isNotEmpty) {
       Future.microtask(() {
         ref.read(activeGoalProvider.notifier).select(effectiveActiveGoalId);
       });
@@ -47,8 +52,8 @@ class FocusScreen extends ConsumerWidget {
           children: [
             const Text('Focus', style: AppTextStyles.headline),
             const SizedBox(height: 12),
-            if (goals.isEmpty)
-              const Text('No goals yet. Create your 3 objectives first.',
+            if (availableGoals.isEmpty)
+              const Text('No active goals. Create your 3 objectives first.',
                   style: AppTextStyles.body)
             else
               DropdownButtonFormField<String>(
@@ -67,7 +72,7 @@ class FocusScreen extends ConsumerWidget {
                     borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
-                items: goals
+                items: availableGoals
                     .map(
                       (g) => DropdownMenuItem<String>(
                         value: g.id,
