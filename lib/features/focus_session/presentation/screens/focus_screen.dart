@@ -26,9 +26,14 @@ class FocusScreen extends ConsumerWidget {
         .where((g) => g.sessionsTotal <= 0 || g.sessionsDone < g.sessionsTotal)
         .toList();
 
-    final effectiveActiveGoalId = activeGoalId ??
-        (availableGoals.isNotEmpty ? availableGoals.first.id : null);
-    if (effectiveActiveGoalId != activeGoalId && availableGoals.isNotEmpty) {
+    final hasActive = activeGoalId != null &&
+        availableGoals.any((g) => g.id == activeGoalId);
+
+    final effectiveActiveGoalId = hasActive
+        ? activeGoalId
+        : (availableGoals.isNotEmpty ? availableGoals.first.id : null);
+
+    if (effectiveActiveGoalId != activeGoalId) {
       Future.microtask(() {
         ref.read(activeGoalProvider.notifier).select(effectiveActiveGoalId);
       });
