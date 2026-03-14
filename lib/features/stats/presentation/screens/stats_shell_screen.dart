@@ -22,6 +22,13 @@ class _StatsShellScreenState extends ConsumerState<StatsShellScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 2, vsync: this);
+
+    // Ensure history is loaded so derived stats are available immediately.
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(historyProvider.notifier).load();
+      }
+    });
   }
 
   @override
