@@ -73,6 +73,7 @@ class ReminderController extends StateNotifier<ReminderState> {
     state = state.copyWith(enabled: enabled);
     await LocalStorage.saveReminderEnabled(enabled);
     await syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -80,6 +81,7 @@ class ReminderController extends StateNotifier<ReminderState> {
     state = state.copyWith(hour: hour, minute: minute);
     await LocalStorage.saveReminderTime(hour: hour, minute: minute);
     await syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -87,6 +89,7 @@ class ReminderController extends StateNotifier<ReminderState> {
     state = state.copyWith(nextGoalEnabled: enabled);
     await LocalStorage.saveNextGoalReminderEnabled(enabled);
     await syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -94,6 +97,7 @@ class ReminderController extends StateNotifier<ReminderState> {
     state = state.copyWith(nextGoalLeadMinutes: minutes);
     await LocalStorage.saveNextGoalReminderLeadMinutes(minutes);
     await syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 

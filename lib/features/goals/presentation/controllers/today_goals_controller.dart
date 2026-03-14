@@ -31,6 +31,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
 
     await LocalStorage.saveGoalsDay(today);
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -38,6 +39,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     state = state.map((g) => g.id == updated.id ? updated : g).toList();
     await LocalStorage.saveGoals(state);
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -46,6 +48,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     await LocalStorage.saveGoals(state);
     await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
@@ -55,6 +58,7 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
     await LocalStorage.saveGoals(reset);
     await LocalStorage.saveGoalsDay(_dayKey(DateTime.now()));
     await _ref.read(reminderProvider.notifier).syncWithGoals();
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 

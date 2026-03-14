@@ -21,6 +21,7 @@ class HistoryController extends StateNotifier<List<FocusLog>> {
     final next = [log, ...state];
     state = next;
     await LocalStorage.saveFocusLogs(next);
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 

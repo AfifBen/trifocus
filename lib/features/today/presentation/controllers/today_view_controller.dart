@@ -29,6 +29,7 @@ class TodayViewController extends StateNotifier<TodayViewMode> {
     await LocalStorage.saveTodayViewMode(
       state == TodayViewMode.timeline ? 'timeline' : 'cards',
     );
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 }

@@ -17,6 +17,7 @@ class HideDoneController extends StateNotifier<bool> {
   Future<void> toggle() async {
     state = !state;
     await LocalStorage.saveHideDoneGoals(state);
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 }

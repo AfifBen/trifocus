@@ -44,12 +44,14 @@ class FocusSettingsController extends StateNotifier<FocusSettingsState> {
   Future<void> setFocusSeconds(int seconds) async {
     state = state.copyWith(focusSeconds: seconds);
     await LocalStorage.saveFocusDurationSeconds(seconds);
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 
   Future<void> setBreakSeconds(int seconds) async {
     state = state.copyWith(breakSeconds: seconds);
     await LocalStorage.saveBreakDurationSeconds(seconds);
+    await LocalStorage.saveCloudPending(true);
     await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
   }
 }
