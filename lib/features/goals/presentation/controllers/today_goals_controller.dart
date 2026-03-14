@@ -31,8 +31,12 @@ class TodayGoalsController extends StateNotifier<List<Goal>> {
 
     await LocalStorage.saveGoalsDay(today);
     await _ref.read(reminderProvider.notifier).syncWithGoals();
-    await LocalStorage.saveCloudPending(true);
-    await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
+
+    // Only push to cloud when we actually mutated local data (e.g., daily reset).
+    if (shouldReset && next.isNotEmpty) {
+      await LocalStorage.saveCloudPending(true);
+      await _ref.read(cloudSyncProvider.notifier).pushIfSignedIn();
+    }
   }
 
   Future<void> updateGoal(Goal updated) async {
