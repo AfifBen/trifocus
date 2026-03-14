@@ -46,6 +46,18 @@ final cloudSyncProvider = StateNotifierProvider<CloudSyncController, CloudSyncSt
 
 class CloudSyncController extends StateNotifier<CloudSyncState> {
   final Ref _ref;
+
+  Map<String, dynamic> _mergeNonNull(
+    Map<String, dynamic> remote,
+    Map<String, dynamic> local,
+  ) {
+    final merged = Map<String, dynamic>.from(local);
+    remote.forEach((key, value) {
+      if (value != null) merged[key] = value;
+    });
+    return merged;
+  }
+
   CloudSyncController(this._ref)
       : super(const CloudSyncState(
           syncing: false,
@@ -118,7 +130,13 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
       }
 
       if (remoteIsNewer) {
-        await LocalStorage.importAll(remoteData);
+        // Merge strategy: never overwrite local values with nulls coming from
+        // cloud backups (older versions or partial payloads). This prevents
+        // wiping data like focusLogs.
+        final local = await LocalStorage.exportAll();
+        final merged = _mergeNonNull(remoteData, local);
+
+        await LocalStorage.importAll(merged);
         await LocalStorage.saveCloudUpdatedAt(remoteUpdatedAt!.toIso8601String());
         await LocalStorage.saveCloudPending(false);
         state = state.copyWith(
@@ -146,7 +164,11 @@ class CloudSyncController extends StateNotifier<CloudSyncState> {
     if (data == null || updatedAt == null) return;
 
     state = state.copyWith(syncing: true, lastError: null);
-    await LocalStorage.importAll(data);
+
+    final local = await LocalStorage.exportAll();
+    final merged = _mergeNonNull(data, local);
+
+    await LocalStorage.importAll(merged);
     await LocalStorage.saveCloudUpdatedAt(updatedAt.toIso8601String());
     await LocalStorage.saveCloudPending(false);
     state = state.copyWith(
