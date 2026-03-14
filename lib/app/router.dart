@@ -8,7 +8,7 @@ import '../features/focus_session/presentation/screens/focus_screen.dart';
 import '../features/focus_session/presentation/screens/break_screen.dart';
 import '../features/focus_session/presentation/screens/session_complete_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
-import '../features/stats/presentation/screens/stats_screen.dart';
+import '../features/stats/presentation/screens/stats_shell_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
 import '../features/library/presentation/screens/projects_screen.dart';
 import '../features/library/presentation/screens/habits_screen.dart';
@@ -133,7 +133,7 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/stats',
-          builder: (context, state) => const StatsScreen(),
+          builder: (context, state) => const StatsShellScreen(),
         ),
       ],
     ),

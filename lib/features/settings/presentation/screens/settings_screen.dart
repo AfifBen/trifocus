@@ -18,6 +18,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../sync/cloud_sync_controller.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../controllers/backup_controller.dart';
+import '../controllers/export_import_controller.dart';
 import '../controllers/locale_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -529,22 +530,9 @@ class SettingsScreen extends ConsumerWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () async {
-                  final logs = ref.read(historyProvider);
-                  final csv = StringBuffer('date,goal,duration_min,status\n');
-                  for (final l in logs) {
-                    final date = l.createdAt.toIso8601String();
-                    final goal = (l.goalTitle ?? '').replaceAll('"', '""');
-                    final mins = (l.durationSeconds / 60).round();
-                    final status = l.status.name;
-                    csv.writeln('"$date","$goal",$mins,$status');
-                  }
-                  await Clipboard.setData(ClipboardData(text: csv.toString()));
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('History CSV copied.')),
-                  );
+                  await ref.read(exportImportProvider).exportHistoryCsv();
                 },
-                child: const Text('Export history (CSV to clipboard)'),
+                child: const Text('Export history (CSV file)'),
               ),
             ),
             const SizedBox(height: 12),
@@ -552,35 +540,23 @@ class SettingsScreen extends ConsumerWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () async {
-                  final logs = ref.read(historyProvider);
-                  final now = DateTime.now();
-                  final weekStart = now.subtract(Duration(days: now.weekday - 1));
-                  final weekStartDay =
-                      DateTime(weekStart.year, weekStart.month, weekStart.day);
-
-                  final weekLogs = logs
-                      .where((l) => l.createdAt.isAfter(weekStartDay))
-                      .where((l) => l.status.name == 'completed')
-                      .toList();
-
-                  final totalMin = weekLogs.fold<int>(
-                    0,
-                    (acc, l) => acc + (l.durationSeconds ~/ 60),
-                  );
-
-                  final report = StringBuffer();
-                  report.writeln('Weekly Focus Report');
-                  report.writeln('Week of ${weekStartDay.toIso8601String().split('T').first}');
-                  report.writeln('Total focus: ${totalMin} min');
-                  report.writeln('Sessions: ${weekLogs.length}');
-
-                  await Clipboard.setData(ClipboardData(text: report.toString()));
+                  await ref.read(exportImportProvider).exportWeeklyReportTxt();
+                },
+                child: const Text('Export weekly report (TXT file)'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  await ref.read(exportImportProvider).importHistoryCsv();
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Weekly report copied.')),
+                    const SnackBar(content: Text('CSV imported to clipboard.')),
                   );
                 },
-                child: const Text('Copy weekly report'),
+                child: const Text('Import history (CSV)'),
               ),
             ),
             const SizedBox(height: 12),

@@ -48,6 +48,9 @@ dependencies:
   cloud_firestore: ^5.4.4
   firebase_messaging: ^15.2.4
   quick_actions: ^1.1.0
+  share_plus: ^10.0.3
+  file_picker: ^8.1.2
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
