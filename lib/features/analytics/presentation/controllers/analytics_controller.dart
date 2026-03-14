@@ -14,7 +14,7 @@ class AnalyticsState {
 
 final analyticsProvider = Provider<AnalyticsState>((ref) {
   final logs = ref.watch(historyProvider);
-  final completed = logs.where((l) => l.status == FocusLogStatus.completed);
+  final completed = logs; // include completed + endedEarly
 
   String dayKey(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');

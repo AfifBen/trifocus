@@ -57,7 +57,8 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
     final result = ref.read(sessionResultProvider);
 
     final lastDuration = ref.read(lastSessionDurationProvider);
-    final duration = lastDuration ?? focusTimer.totalSeconds;
+    final planned = focusTimer.totalSeconds;
+    final duration = lastDuration ?? planned;
 
     await ref.read(historyProvider.notifier).add(
           FocusLog(
@@ -65,6 +66,7 @@ class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
             goalId: goalId,
             goalTitle: title,
             durationSeconds: duration,
+            plannedDurationSeconds: planned,
             createdAt: DateTime.now(),
             status: result == SessionResult.endedEarly
                 ? FocusLogStatus.endedEarly

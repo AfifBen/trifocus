@@ -4,7 +4,13 @@ class FocusLog {
   final String id;
   final String? goalId;
   final String? goalTitle;
+
+  /// Actual logged duration.
   final int durationSeconds;
+
+  /// Planned duration (e.g., configured focus duration). Optional for migration.
+  final int? plannedDurationSeconds;
+
   final DateTime createdAt;
   final FocusLogStatus status;
 
@@ -13,6 +19,7 @@ class FocusLog {
     required this.goalId,
     required this.goalTitle,
     required this.durationSeconds,
+    required this.plannedDurationSeconds,
     required this.createdAt,
     required this.status,
   });
@@ -22,6 +29,7 @@ class FocusLog {
         'goalId': goalId,
         'goalTitle': goalTitle,
         'durationSeconds': durationSeconds,
+        'plannedDurationSeconds': plannedDurationSeconds,
         'createdAt': createdAt.toIso8601String(),
         'status': status.name,
       };
@@ -31,6 +39,8 @@ class FocusLog {
         goalId: json['goalId'] as String?,
         goalTitle: json['goalTitle'] as String?,
         durationSeconds: (json['durationSeconds'] as num?)?.toInt() ?? 0,
+        plannedDurationSeconds:
+            (json['plannedDurationSeconds'] as num?)?.toInt(),
         createdAt: DateTime.parse(json['createdAt'] as String),
         status: (json['status'] as String?) == FocusLogStatus.endedEarly.name
             ? FocusLogStatus.endedEarly

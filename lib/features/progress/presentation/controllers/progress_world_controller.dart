@@ -29,14 +29,16 @@ final progressWorldProvider = Provider<ProgressWorldState>((ref) {
   final logs = ref.watch(historyProvider);
   final streakDays = ref.watch(statsProvider).streakDays;
 
-  final completed = logs.where((l) => l.status == FocusLogStatus.completed);
+  // Progress counts both completed and endedEarly (but endedEarly contributes
+  // less automatically because durationSeconds is the elapsed time).
+  final counted = logs;
 
-  final minutes = completed.fold<int>(
+  final minutes = counted.fold<int>(
     0,
     (acc, l) => acc + (l.durationSeconds ~/ 60),
   );
 
-  final sessions = completed.length;
+  final sessions = counted.length;
 
   final multiplier = switch (streakDays) {
     >= 14 => 1.3,

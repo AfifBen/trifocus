@@ -210,10 +210,12 @@ class FocusScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      notifier.pause();
-                    },
+                    onPressed: availableGoals.isEmpty
+                        ? null
+                        : () {
+                            HapticFeedback.selectionClick();
+                            notifier.pause();
+                          },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: const BorderSide(color: AppColors.border),
@@ -228,10 +230,12 @@ class FocusScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      notifier.start();
-                    },
+                    onPressed: availableGoals.isEmpty
+                        ? null
+                        : () {
+                            HapticFeedback.lightImpact();
+                            notifier.start();
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textPrimary,
@@ -253,17 +257,19 @@ class FocusScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  ref.read(sessionResultProvider.notifier).setEndedEarly();
-                  final elapsed = (timer.totalSeconds - timer.remainingSeconds)
-                      .clamp(0, timer.totalSeconds);
-                  ref
-                      .read(lastSessionDurationProvider.notifier)
-                      .set(elapsed);
-                  notifier.reset();
-                  context.go('/session-complete');
-                },
+                onPressed: availableGoals.isEmpty
+                    ? null
+                    : () {
+                        HapticFeedback.mediumImpact();
+                        ref.read(sessionResultProvider.notifier).setEndedEarly();
+                        final elapsed = (timer.totalSeconds - timer.remainingSeconds)
+                            .clamp(0, timer.totalSeconds);
+                        ref
+                            .read(lastSessionDurationProvider.notifier)
+                            .set(elapsed);
+                        notifier.reset();
+                        context.go('/session-complete');
+                      },
                 child: const Text('End Session'),
               ),
             ),
