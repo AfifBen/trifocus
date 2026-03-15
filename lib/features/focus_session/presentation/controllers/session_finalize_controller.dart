@@ -9,6 +9,8 @@ final sessionFinalizeProvider = Provider<SessionFinalizeController>(
   (ref) => SessionFinalizeController(ref),
 );
 
+final sessionFinalizingProvider = StateProvider<bool>((ref) => false);
+
 class SessionFinalizeController {
   final Ref _ref;
   SessionFinalizeController(this._ref);

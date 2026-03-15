@@ -17,8 +17,10 @@ class BreakScreen extends ConsumerWidget {
     final timer = ref.watch(breakTimerProvider);
     final notifier = ref.read(breakTimerProvider.notifier);
 
-    // Ensure timer matches current settings.
-    if (!timer.isRunning && timer.totalSeconds != settings.breakSeconds) {
+    // Ensure timer matches current settings (and reset if already ended).
+    if (!timer.isRunning &&
+        (timer.remainingSeconds == 0 ||
+            timer.totalSeconds != settings.breakSeconds)) {
       Future.microtask(() => notifier.reset(settings.breakSeconds));
     }
 

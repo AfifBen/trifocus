@@ -42,22 +42,30 @@ class FocusScreen extends ConsumerWidget {
       });
     }
 
+    final isFinalizing = ref.watch(sessionFinalizingProvider);
+
     if (timer.remainingSeconds == 0) {
-      Future.microtask(() {
-        if (context.mounted) {
+      Future.microtask(() async {
+        if (!context.mounted) return;
+        if (ref.read(sessionFinalizingProvider)) return;
+
+        ref.read(sessionFinalizingProvider.notifier).state = true;
+        try {
           notifier.pause();
           ref.read(sessionResultProvider.notifier).setCompleted();
           final planned = timer.totalSeconds;
           ref.read(lastSessionDurationProvider.notifier).set(planned);
 
           // Finalize immediately (so data is saved even if user quits during break).
-          ref.read(sessionFinalizeProvider).finalize(
+          await ref.read(sessionFinalizeProvider).finalize(
                 status: FocusLogStatus.completed,
                 durationSeconds: planned,
                 plannedDurationSeconds: planned,
               );
 
-          context.go('/break');
+          if (context.mounted) context.go('/break');
+        } finally {
+          ref.read(sessionFinalizingProvider.notifier).state = false;
         }
       });
     }
@@ -219,7 +227,7 @@ class FocusScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: availableGoals.isEmpty
+                    onPressed: (availableGoals.isEmpty || isFinalizing)
                         ? null
                         : () {
                             HapticFeedback.selectionClick();
@@ -239,7 +247,7 @@ class FocusScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: availableGoals.isEmpty
+                    onPressed: (availableGoals.isEmpty || isFinalizing)
                         ? null
                         : () {
                             HapticFeedback.lightImpact();
@@ -266,27 +274,33 @@ class FocusScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: availableGoals.isEmpty
+                onPressed: (availableGoals.isEmpty || isFinalizing)
                     ? null
-                    : () {
-                        HapticFeedback.mediumImpact();
-                        ref.read(sessionResultProvider.notifier).setEndedEarly();
-                        final planned = timer.totalSeconds;
-                        final elapsed = (planned - timer.remainingSeconds)
-                            .clamp(0, planned);
-                        ref
-                            .read(lastSessionDurationProvider.notifier)
-                            .set(elapsed);
+                    : () async {
+                        if (ref.read(sessionFinalizingProvider)) return;
+                        ref.read(sessionFinalizingProvider.notifier).state = true;
+                        try {
+                          HapticFeedback.mediumImpact();
+                          ref.read(sessionResultProvider.notifier).setEndedEarly();
+                          final planned = timer.totalSeconds;
+                          final elapsed = (planned - timer.remainingSeconds)
+                              .clamp(0, planned);
+                          ref
+                              .read(lastSessionDurationProvider.notifier)
+                              .set(elapsed);
 
-                        // Finalize immediately.
-                        ref.read(sessionFinalizeProvider).finalize(
-                              status: FocusLogStatus.endedEarly,
-                              durationSeconds: elapsed,
-                              plannedDurationSeconds: planned,
-                            );
+                          // Finalize immediately.
+                          await ref.read(sessionFinalizeProvider).finalize(
+                                status: FocusLogStatus.endedEarly,
+                                durationSeconds: elapsed,
+                                plannedDurationSeconds: planned,
+                              );
 
-                        notifier.reset();
-                        context.go('/session-complete');
+                          notifier.reset();
+                          if (context.mounted) context.go('/break');
+                        } finally {
+                          ref.read(sessionFinalizingProvider.notifier).state = false;
+                        }
                       },
                 child: const Text('End Session'),
               ),
