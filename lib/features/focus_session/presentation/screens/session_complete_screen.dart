@@ -1,96 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
-import '../../../stats/presentation/controllers/stats_controller.dart';
-import '../../../goals/presentation/controllers/today_goals_controller.dart';
-import '../../../history/domain/models/focus_log.dart';
-import '../../../history/presentation/controllers/history_controller.dart';
-import '../controllers/active_goal_controller.dart';
-import '../controllers/focus_timer_controller.dart';
-import '../controllers/session_result_controller.dart';
-import '../controllers/session_duration_controller.dart';
 
-class SessionCompleteScreen extends ConsumerStatefulWidget {
+class SessionCompleteScreen extends StatelessWidget {
   const SessionCompleteScreen({super.key});
-
-  @override
-  ConsumerState<SessionCompleteScreen> createState() => _SessionCompleteScreenState();
-}
-
-class _SessionCompleteScreenState extends ConsumerState<SessionCompleteScreen> {
-  bool _counted = false;
-  bool _goalUpdated = false;
-  bool _logged = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_counted) {
-      _counted = true;
-      ref.read(statsProvider.notifier).completeSession();
-    }
-    if (!_goalUpdated) {
-      _goalUpdated = true;
-      _incrementActiveGoal();
-    }
-    if (!_logged) {
-      _logged = true;
-      _logSession();
-    }
-  }
-
-  Future<void> _logSession() async {
-    final goalId = ref.read(activeGoalProvider);
-    final goals = ref.read(todayGoalsProvider);
-
-    String? title;
-    if (goals.isNotEmpty) {
-      final idx = goalId == null ? 0 : goals.indexWhere((g) => g.id == goalId);
-      final safeIdx = idx >= 0 ? idx : 0;
-      title = goals[safeIdx].title;
-    }
-
-    final focusTimer = ref.read(focusTimerProvider);
-    final result = ref.read(sessionResultProvider);
-
-    final lastDuration = ref.read(lastSessionDurationProvider);
-    final planned = focusTimer.totalSeconds;
-    final duration = lastDuration ?? planned;
-
-    await ref.read(historyProvider.notifier).add(
-          FocusLog(
-            id: 'log_${DateTime.now().microsecondsSinceEpoch}',
-            goalId: goalId,
-            goalTitle: title,
-            durationSeconds: duration,
-            plannedDurationSeconds: planned,
-            createdAt: DateTime.now(),
-            status: result == SessionResult.endedEarly
-                ? FocusLogStatus.endedEarly
-                : FocusLogStatus.completed,
-          ),
-        );
-
-    ref.read(lastSessionDurationProvider.notifier).clear();
-  }
-
-  Future<void> _incrementActiveGoal() async {
-    final goalId = ref.read(activeGoalProvider);
-    if (goalId == null) return;
-
-    final goals = ref.read(todayGoalsProvider);
-    final idx = goals.indexWhere((g) => g.id == goalId);
-    if (idx == -1) return;
-
-    final goal = goals[idx];
-    final updated = goal.copyWith(
-      sessionsDone: (goal.sessionsDone + 1).clamp(0, goal.sessionsTotal),
-    );
-    await ref.read(todayGoalsProvider.notifier).updateGoal(updated);
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -11,6 +11,7 @@ import '../controllers/focus_settings_controller.dart';
 import '../controllers/focus_timer_controller.dart';
 import '../controllers/session_result_controller.dart';
 import '../controllers/session_duration_controller.dart';
+import '../controllers/session_finalize_controller.dart';
 
 class FocusScreen extends ConsumerWidget {
   const FocusScreen({super.key});
@@ -45,9 +46,16 @@ class FocusScreen extends ConsumerWidget {
         if (context.mounted) {
           notifier.pause();
           ref.read(sessionResultProvider.notifier).setCompleted();
-          ref
-              .read(lastSessionDurationProvider.notifier)
-              .set(timer.totalSeconds);
+          final planned = timer.totalSeconds;
+          ref.read(lastSessionDurationProvider.notifier).set(planned);
+
+          // Finalize immediately (so data is saved even if user quits during break).
+          ref.read(sessionFinalizeProvider).finalize(
+                status: FocusLogStatus.completed,
+                durationSeconds: planned,
+                plannedDurationSeconds: planned,
+              );
+
           context.go('/break');
         }
       });
@@ -262,11 +270,20 @@ class FocusScreen extends ConsumerWidget {
                     : () {
                         HapticFeedback.mediumImpact();
                         ref.read(sessionResultProvider.notifier).setEndedEarly();
-                        final elapsed = (timer.totalSeconds - timer.remainingSeconds)
-                            .clamp(0, timer.totalSeconds);
+                        final planned = timer.totalSeconds;
+                        final elapsed = (planned - timer.remainingSeconds)
+                            .clamp(0, planned);
                         ref
                             .read(lastSessionDurationProvider.notifier)
                             .set(elapsed);
+
+                        // Finalize immediately.
+                        ref.read(sessionFinalizeProvider).finalize(
+                              status: FocusLogStatus.endedEarly,
+                              durationSeconds: elapsed,
+                              plannedDurationSeconds: planned,
+                            );
+
                         notifier.reset();
                         context.go('/session-complete');
                       },
