@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../goals/presentation/controllers/today_goals_controller.dart';
+import '../../../history/domain/models/focus_log.dart';
 import '../controllers/active_goal_controller.dart';
 import '../controllers/focus_settings_controller.dart';
 import '../controllers/focus_timer_controller.dart';
